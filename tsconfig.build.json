@@ -1,0 +1,17 @@
+{
+  // The shipped build: ES modules and declarations in dist/, tests left out. The
+  // source imports with `.ts` extensions so node and the tests run it as is;
+  // rewriteRelativeImportExtensions turns them into `.js` in what ships, because
+  // node will not strip types from a file under node_modules. Fixtures are test
+  // data, so they stay out of what ships as the tests do.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rewriteRelativeImportExtensions": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": []
+  },
+  "exclude": ["src/**/*.test.ts", "src/**/fixtures/**"]
+}

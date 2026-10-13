@@ -1,0 +1,23 @@
+// The entry log's public surface: what a host imports, and all it needs.
+// The front door: one memory from one config, and the operations to write to it.
+export { defineMemory } from './memory/define.ts'
+export type { Memory, MemoryConfig, MemoryWrite, RenderConfig } from './memory/define.ts'
+export { add, supersede, retire, apply, discard, confirm, dismiss, forget } from './memory/ops.ts'
+export type { EntrySpec } from './memory/ops.ts'
+// The building blocks it is made of.
+export { applyEntryEvent, foldEntries, findEntry, liveEntries, findProposal, openProposals, isApplicable, emptyState } from './log/fold.ts'
+export { tombstoneRedacted, wordingsForgottenBy } from './log/redact.ts'
+export type { ForgottenWording, Holder } from './log/redact.ts'
+export { isLapsed, isReviewDue, isCheckInDue } from './log/lapse.ts'
+export { waitingQuestions } from './log/questions.ts'
+export { sameFactAs } from './log/names.ts'
+export { normaliseText, skeleton, textProblem, sharesContentWords, escapeEntryText } from './text.ts'
+export { validate, validateRun } from './validation/validate.ts'
+export { planWrite } from './write/plan.ts'
+export type { WriteRequest, WritePlan, WriteAppend, WriteForget } from './write/plan.ts'
+export { assertionFor } from './validation/writer.ts'
+export { renderEntries, provenance } from './render.ts'
+export type { ValidationPolicy, ValidationContext, Verdict, KindRule } from './validation/validate.ts'
+export type { WriterContext } from './validation/writer.ts'
+export type { RenderPolicy, Rendering, Provenance } from './render.ts'
+export type * from './log/types.ts'

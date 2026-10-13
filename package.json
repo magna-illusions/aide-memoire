@@ -1,0 +1,58 @@
+{
+  "name": "aide-memoire",
+  "version": "1.0.0",
+  "description": "A typed, provenance-carrying memory log for AI agents: entries, a writer model, proposals, redaction and an escaped, budgeted prompt rendering. Pure functions, no dependencies.",
+  "keywords": [
+    "ai-agent",
+    "agent-memory",
+    "memory",
+    "llm",
+    "event-sourcing",
+    "prompt-injection",
+    "provenance"
+  ],
+  "homepage": "https://github.com/magna-illusions/aide-memoire#readme",
+  "bugs": {
+    "url": "https://github.com/magna-illusions/aide-memoire/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magna-illusions/aide-memoire.git"
+  },
+  "license": "MIT",
+  "author": "Magna Illusions AB",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./dream": {
+      "types": "./dist/dream/index.d.ts",
+      "default": "./dist/dream/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.examples.json",
+    "pretest": "npm run build",
+    "test": "node --test 'src/**/*.test.ts' 'src/**/*.test.mjs'",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/pg": "^8.23.1",
+    "typescript": "^7.0.2"
+  }
+}

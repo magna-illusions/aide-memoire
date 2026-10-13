@@ -1,0 +1,288 @@
+[
+  {
+    "type": "EntryAdded",
+    "at": "2026-08-30T08:00:00Z",
+    "entry": {
+      "id": "e-mig",
+      "kind": "plan",
+      "text": "checkup with the allergist twice a year",
+      "severity": "soft",
+      "source": {
+        "kind": "migration",
+        "id": "run-1"
+      },
+      "assertedBy": "operator",
+      "origin": "migration",
+      "writer": "migration",
+      "relayed": false
+    }
+  },
+  {
+    "type": "EntryProposed",
+    "at": "2026-08-30T08:00:01Z",
+    "id": "p-mig",
+    "reason": "lost in a rewrite; still true?",
+    "op": {
+      "type": "EntryAdded",
+      "at": "2026-08-30T08:00:01Z",
+      "entry": {
+        "id": "e-lost",
+        "kind": "limit",
+        "text": "no shellfish either",
+        "severity": "hard",
+        "source": {
+          "kind": "migration",
+          "id": "run-1"
+        },
+        "assertedBy": "operator",
+        "origin": "migration",
+        "writer": "migration",
+        "relayed": false
+      }
+    }
+  },
+  {
+    "type": "MigrationApplied",
+    "at": "2026-08-30T08:00:02Z"
+  },
+  {
+    "type": "EntryProposed",
+    "at": "2026-09-01T10:03:00Z",
+    "id": "p1",
+    "reason": "a hard entry the agent inferred is held for the subject",
+    "op": {
+      "type": "EntryAdded",
+      "at": "2026-09-01T10:03:00Z",
+      "entry": {
+        "id": "e-allergy",
+        "kind": "limit",
+        "text": "peanut allergy: no satay sauce",
+        "severity": "hard",
+        "source": {
+          "kind": "message",
+          "id": "m1"
+        },
+        "assertedBy": "agent",
+        "origin": "conversation",
+        "writer": "agent",
+        "relayed": true
+      }
+    }
+  },
+  {
+    "type": "EntryConfirmed",
+    "at": "2026-09-01T10:04:00Z",
+    "target": "proposal",
+    "id": "p1",
+    "source": {
+      "kind": "action",
+      "id": "tap-1"
+    },
+    "assertedBy": "subject",
+    "origin": "action",
+    "writer": "subject-action"
+  },
+  {
+    "type": "EntryAdded",
+    "at": "2026-09-01T10:05:00Z",
+    "entry": {
+      "id": "e-tea",
+      "kind": "fact",
+      "text": "",
+      "severity": "soft",
+      "source": {
+        "kind": "message",
+        "id": "m3"
+      },
+      "assertedBy": "agent",
+      "origin": "conversation",
+      "writer": "agent",
+      "relayed": true
+    }
+  },
+  {
+    "type": "EntryAdded",
+    "at": "2026-09-01T10:06:00Z",
+    "entry": {
+      "id": "e-trip",
+      "kind": "fact",
+      "text": "travels to Oslo next week",
+      "severity": "soft",
+      "until": "2026-09-12",
+      "source": {
+        "kind": "message",
+        "id": "m3"
+      },
+      "assertedBy": "agent",
+      "origin": "conversation",
+      "writer": "agent",
+      "relayed": true
+    }
+  },
+  {
+    "type": "EntryAdded",
+    "at": "2026-09-02T09:00:00Z",
+    "entry": {
+      "id": "e-window",
+      "kind": "fact",
+      "text": "prefers a window seat",
+      "severity": "soft",
+      "review": "2026-09-15",
+      "source": {
+        "kind": "action",
+        "id": "form-1"
+      },
+      "assertedBy": "subject",
+      "origin": "action",
+      "writer": "subject-action",
+      "relayed": false
+    }
+  },
+  {
+    "type": "EntrySuperseded",
+    "at": "2026-09-10T10:01:00Z",
+    "supersedes": "e-tea",
+    "entry": {
+      "id": "e-tea2",
+      "kind": "fact",
+      "text": "",
+      "severity": "soft",
+      "source": {
+        "kind": "message",
+        "id": "m4"
+      },
+      "assertedBy": "agent",
+      "origin": "conversation",
+      "writer": "agent",
+      "relayed": true
+    }
+  },
+  {
+    "type": "EntryRetired",
+    "at": "2026-09-21T03:00:00Z",
+    "id": "e-trip",
+    "reason": "the trip is over",
+    "source": {
+      "kind": "message",
+      "id": "m5"
+    },
+    "assertedBy": "agent",
+    "origin": "consolidation",
+    "writer": "consolidation",
+    "runId": "run-0921"
+  },
+  {
+    "type": "EntryProposed",
+    "at": "2026-09-21T03:00:01Z",
+    "id": "p2",
+    "reason": "changing a hard entry is held for the subject",
+    "op": {
+      "type": "EntryRetired",
+      "at": "2026-09-21T03:00:01Z",
+      "id": "e-allergy",
+      "reason": "not mentioned in weeks; is this over?",
+      "source": {
+        "kind": "session",
+        "id": "s-9"
+      },
+      "assertedBy": "agent",
+      "origin": "consolidation",
+      "writer": "consolidation",
+      "runId": "run-0921"
+    }
+  },
+  {
+    "type": "EntryDismissed",
+    "at": "2026-09-22T08:00:00Z",
+    "target": "proposal",
+    "id": "p2",
+    "source": {
+      "kind": "action",
+      "id": "tap-2"
+    },
+    "assertedBy": "subject",
+    "origin": "action",
+    "writer": "subject-action"
+  },
+  {
+    "type": "EntryProposed",
+    "at": "2026-09-22T09:00:00Z",
+    "id": "p3",
+    "reason": "external text is held for the subject",
+    "op": {
+      "type": "EntryAdded",
+      "at": "2026-09-22T09:00:00Z",
+      "entry": {
+        "id": "e-page",
+        "kind": "fact",
+        "text": "Oslo hotels near the station",
+        "severity": "soft",
+        "source": {
+          "kind": "message",
+          "id": "m5"
+        },
+        "assertedBy": "agent",
+        "origin": "external",
+        "writer": "agent",
+        "relayed": false
+      }
+    }
+  },
+  {
+    "type": "EntryConfirmed",
+    "at": "2026-09-23T08:00:00Z",
+    "target": "entry",
+    "id": "e-window",
+    "source": {
+      "kind": "action",
+      "id": "tap-3"
+    },
+    "assertedBy": "subject",
+    "origin": "action",
+    "writer": "subject-action"
+  },
+  {
+    "type": "EntryAdded",
+    "at": "2026-09-24T08:00:00Z",
+    "entry": {
+      "id": "e-op",
+      "kind": "plan",
+      "text": "account moved to the new plan",
+      "severity": "soft",
+      "source": {
+        "kind": "correction",
+        "id": "c-1"
+      },
+      "assertedBy": "operator",
+      "origin": "operator",
+      "writer": "operator",
+      "relayed": false
+    }
+  },
+  {
+    "type": "EntryRedacted",
+    "at": "2026-09-25T10:01:00Z",
+    "id": "e-tea2",
+    "source": {
+      "kind": "message",
+      "id": "m6"
+    },
+    "assertedBy": "agent",
+    "origin": "conversation",
+    "writer": "agent"
+  },
+  {
+    "type": "EntryAdded",
+    "at": "2026-09-26T00:00:00Z",
+    "entry": {
+      "id": "e-bad",
+      "kind": "fact",
+      "text": "no source",
+      "severity": "soft"
+    }
+  },
+  {
+    "type": "SomethingElse",
+    "at": "2026-09-26T00:00:01Z"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  // The README's examples, checked as JavaScript against the source's types, so
+  // an example that drifts from the API fails the typecheck.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noImplicitAny": false,
+    "paths": {
+      "aide-memoire": ["./src/index.ts"],
+      "aide-memoire/dream": ["./src/dream/index.ts"],
+      "petit-journal": ["./examples/vendor/petit-journal.d.ts"]
+    },
+    // A README snippet defines what the reader goes on to use: the recipe's `write`.
+    "noUnusedLocals": false
+  },
+  "include": ["examples"]
+}
