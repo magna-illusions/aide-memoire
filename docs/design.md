@@ -411,7 +411,7 @@ src/
   render.ts       the prompt block and provenance
   text.ts         the text rules and the escape, shared by the gate, the render and dream
   dream/          the `aide-memoire/dream` subpath: the daily and periodic passes
-examples/         the examples, type-checked against the source (and petit-journal's types, vendored)
+examples/         the examples, type-checked against the source and petit-journal's published types
 ```
 
 `validation/stamp.ts` is what the validator writes onto an event it lets through; `log/events.ts`

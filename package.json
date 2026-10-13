@@ -53,6 +53,7 @@
   "devDependencies": {
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
+    "petit-journal": "^1.0.0",
     "typescript": "^7.0.2"
   }
 }

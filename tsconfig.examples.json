@@ -8,8 +8,7 @@
     "noImplicitAny": false,
     "paths": {
       "aide-memoire": ["./src/index.ts"],
-      "aide-memoire/dream": ["./src/dream/index.ts"],
-      "petit-journal": ["./examples/vendor/petit-journal.d.ts"]
+      "aide-memoire/dream": ["./src/dream/index.ts"]
     },
     // A README snippet defines what the reader goes on to use: the recipe's `write`.
     "noUnusedLocals": false

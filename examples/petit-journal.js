@@ -1,5 +1,5 @@
 // The README's petit-journal recipe, exactly: `npm run typecheck` checks it against
-// examples/vendor/petit-journal.d.ts, and src/readme.test.ts holds it to the README.
+// petit-journal's own published types, and src/readme.test.ts holds it to the README.
 
 import pg from 'pg'
 import { openEventStore, defineProjection } from 'petit-journal'
