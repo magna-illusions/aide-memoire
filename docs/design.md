@@ -309,6 +309,10 @@ A validation policy (`ValidationPolicy`):
 | `textRules` | Your refusals, each `(text) => reason \| null`, run on the normalised text: directive patterns addressed to the agent, credentials, serialized documents. |
 | `caps` | `{ liveEntries, addsPerMessage, opsPerRun, ingestedEntries? }`. `addsPerMessage` also caps what one record yields. A hard entry is never refused for space, except from `ingest`, because hard entries always render: `ingestedEntries` (default `liveEntries`) caps the live entries `ingest` holds, hard ones included. A supersede is not counted, so `ingest` can replace an agent's soft entry with a hard one past that cap, still bounded by `liveEntries`. |
 
+A writer that needs other limits, such as a one-time import of long notes, gets its own
+`maxTextLength` or `caps` through `writers`, and `memory.write` holds it to them
+(`memory.policyFor(writer)`).
+
 A render policy (`RenderPolicy`): the block's `tag` and `preamble`, one `{ kind, header }` section
 per kind in reading order, an `otherHeader`, the `provenance` labels, `hardLabel`, `untilLabel`,
 the `reviewDue` header and notes, and `softBudget`. The provenance labels are `confirmed`, `said`,
