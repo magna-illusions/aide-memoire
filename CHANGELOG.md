@@ -2,14 +2,18 @@
 
 ## 1.1.0 (2026-10-14)
 
-Everything here is additive. Code written for 1.0 and logs stored by it behave as before.
+Everything here is additive, with two exceptions. Logs stored by 1.0 fold and render as before.
+
+The first exception: an operation that declares an `actor` other than the one your code names is
+now refused (`writer mismatch: actor`). 1.0 dropped the field. The second changes only the types:
+`Memory` has a new required member, `policyFor`, so a `Memory` object you build by hand needs one.
 
 - `actor` on a write: which agent or job made it, in your words (`forensics-agent`). Any writer
   may name one. The validator stamps it on every operation it lets through, as it stamps the
   writer and the run, and refuses an event that names another. It is kept on the entry and never
   rendered. It is not the run: the per-run cap still counts by `runId`. The background passes take
   one in their deps.
-- `writers` in `defineMemory`: limits for one writer other than the memory's, such as
+- `writers` in `defineMemory`: a writer's own limits, where they differ from the memory's, such as
   `{ migration: { maxTextLength: 1000 } }`. `memory.write` holds each writer to its own, and
   `memory.policyFor(writer)` returns it. `definePasses` takes its caps and text length from the
   `consolidation` writer's.
