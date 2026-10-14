@@ -106,6 +106,19 @@ describe('defineMemory — limits per writer', () => {
     const typed = add({ id: 'e1', kind: 'fact', text: long, source: tap })
     assert.deepEqual(memory.write(memory.empty, { writer: 'subject-action', now: AT, ops: [typed] }).verdicts, [{ verdict: 'reject', reason: 'over the 40-character cap' }])
   })
+
+  it('refuses a writer it does not know, or a limit it does not have, naming it and what it knows', () => {
+    const define = (writers: unknown) => () => defineMemory({ kinds: { fact: { mayBeHard: false } }, render: { tag: 'notes', preamble: 'P' }, writers } as Parameters<typeof defineMemory>[0])
+    assert.throws(define({ migrations: { maxTextLength: 1000 } }), {
+      name: 'TypeError', message: 'writers has no writer "migrations": one of subject-action, agent, consolidation, operator, migration, ingest',
+    })
+    assert.throws(define({ migration: { maxLength: 1000 } }), {
+      name: 'TypeError', message: 'writers.migration has no limit "maxLength": one of maxTextLength, caps',
+    })
+    assert.throws(define({ operator: { caps: { opsPerPass: 5 } } }), {
+      name: 'TypeError', message: 'writers.operator.caps has no cap "opsPerPass": one of liveEntries, addsPerMessage, opsPerRun, ingestedEntries',
+    })
+  })
 })
 
 describe('defineMemory — the methods are the building blocks, bound', () => {

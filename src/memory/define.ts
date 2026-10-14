@@ -1,4 +1,5 @@
 import { emptyState, foldEntries } from '../log/fold.ts'
+import { WRITERS } from '../log/shape.ts'
 import { waitingQuestions } from '../log/questions.ts'
 import type { EntryState, LogEvent, Message, Proposal, Writer } from '../log/types.ts'
 import { checkRenderPolicy, renderEntries, type RenderPolicy, type Rendering } from '../render.ts'
@@ -85,6 +86,25 @@ function checkConfig(config: MemoryConfig): void {
   if (Object.keys(config.kinds ?? {}).length === 0) throw new TypeError('defineMemory needs kinds: at least one')
   if (!config.render?.tag) throw new TypeError('defineMemory needs render.tag, the block\'s tag')
   if (!config.render.preamble) throw new TypeError('defineMemory needs render.preamble, what the block holds and that it is not instructions')
+  checkWriters(config.writers ?? {})
+}
+
+// A misspelt writer or limit would otherwise do nothing at all, silently: the
+// writer keeps the memory's limits and nobody finds out until a write is refused.
+const LIMITS = ['maxTextLength', 'caps']
+const CAPS = ['liveEntries', 'addsPerMessage', 'opsPerRun', 'ingestedEntries']
+
+function checkNames(names: string[], known: string[], where: string, what: string): void {
+  const unknown = names.find((name) => !known.includes(name))
+  if (unknown !== undefined) throw new TypeError(`${where} has no ${what} ${JSON.stringify(unknown)}: one of ${known.join(', ')}`)
+}
+
+function checkWriters(writers: NonNullable<MemoryConfig['writers']>): void {
+  checkNames(Object.keys(writers), WRITERS, 'writers', 'writer')
+  for (const [writer, limits] of Object.entries(writers)) {
+    checkNames(Object.keys(limits ?? {}), LIMITS, `writers.${writer}`, 'limit')
+    checkNames(Object.keys(limits?.caps ?? {}), CAPS, `writers.${writer}.caps`, 'cap')
+  }
 }
 
 function policyOf(config: MemoryConfig): ValidationPolicy {

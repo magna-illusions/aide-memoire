@@ -57,7 +57,7 @@ behaviour, so only a major release changes one.
 | `stopwords` | A small English list (`the`, `and`, `with`, `that`, …): words too common to show that a message says what an entry claims. Replace it for other languages. |
 | `textRules` | none |
 | `caps` | `liveEntries: 50`, `addsPerMessage: 3`, `opsPerRun: 20`. `ingestedEntries` defaults to `liveEntries`. |
-| `writers` | none: every writer gets the memory's limits. `{ migration: { maxTextLength: 1000 } }` gives one writer its own `maxTextLength` or `caps`, merged over the memory's. |
+| `writers` | none: every writer gets the memory's limits. `{ migration: { maxTextLength: 1000 } }` gives one writer its own `maxTextLength` or `caps`, merged over the memory's. An unknown writer, limit or cap name throws a `TypeError` that names it and lists the valid ones. |
 | `render.sections` | One per kind, in the order `kinds` lists them, headed by the kind's name |
 | `render.otherHeader` | `other` |
 | `render.provenance` | Each label is its own name: `confirmed`, `said`, `relayed`, … |

@@ -130,4 +130,4 @@ function cleanEvent(event: EntryEvent): EntryEvent {
   }
 }
 
-export { cleanEvent, draftOf, shapeProblem }
+export { cleanEvent, draftOf, shapeProblem, WRITERS }
