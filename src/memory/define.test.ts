@@ -119,6 +119,15 @@ describe('defineMemory — limits per writer', () => {
       name: 'TypeError', message: 'writers.operator.caps has no cap "opsPerPass": one of liveEntries, addsPerMessage, opsPerRun, ingestedEntries',
     })
   })
+
+  it('refuses limits that are not an object', () => {
+    const define = (writers: unknown) => () => defineMemory({ kinds: { fact: { mayBeHard: false } }, render: { tag: 'notes', preamble: 'P' }, writers } as Parameters<typeof defineMemory>[0])
+    for (const limits of [1000, 'long', null, [1000]]) {
+      assert.throws(define({ migration: limits }), { name: 'TypeError', message: 'writers.migration must be an object' })
+    }
+    assert.throws(define({ migration: { caps: 5 } }), { name: 'TypeError', message: 'writers.migration.caps must be an object' })
+    assert.throws(define(5), { name: 'TypeError', message: 'writers must be an object' })
+  })
 })
 
 describe('defineMemory — the methods are the building blocks, bound', () => {

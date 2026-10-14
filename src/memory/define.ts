@@ -99,10 +99,20 @@ function checkNames(names: string[], known: string[], where: string, what: strin
   if (unknown !== undefined) throw new TypeError(`${where} has no ${what} ${JSON.stringify(unknown)}: one of ${known.join(', ')}`)
 }
 
+// Left out is fine; anything else that is not an object (`{ migration: 1000 }`) is a mistake.
+function checkObject(value: unknown, where: string): void {
+  if (value !== undefined && (typeof value !== 'object' || value === null || Array.isArray(value))) {
+    throw new TypeError(`${where} must be an object`)
+  }
+}
+
 function checkWriters(writers: NonNullable<MemoryConfig['writers']>): void {
+  checkObject(writers, 'writers')
   checkNames(Object.keys(writers), WRITERS, 'writers', 'writer')
   for (const [writer, limits] of Object.entries(writers)) {
+    checkObject(limits, `writers.${writer}`)
     checkNames(Object.keys(limits ?? {}), LIMITS, `writers.${writer}`, 'limit')
+    checkObject(limits?.caps, `writers.${writer}.caps`)
     checkNames(Object.keys(limits?.caps ?? {}), CAPS, `writers.${writer}.caps`, 'cap')
   }
 }
