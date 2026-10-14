@@ -156,6 +156,8 @@ interface Candidate {
 interface DreamWrite {
   writer: 'consolidation'
   runId: string
+  /** Which job this is, as you named it in the pass's deps: the validator stamps it on every operation. */
+  actor?: string
   /** The host's clock, ISO. */
   now: string
   /** The messages the operations may cite. */

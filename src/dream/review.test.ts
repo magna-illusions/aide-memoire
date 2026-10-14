@@ -58,6 +58,13 @@ describe('dreamWeekly', () => {
     assert.deepEqual(open.map((p) => [p.op.type, p.reason]), [['EntryRetired', 'the weekly review asks the subject']])
   })
 
+  it('writes as the actor it is given, and its questions carry it', async () => {
+    const { host, deps } = await setup(tool([{ op: 'retire', target: 'e3', reason: 'early meetings work now', cites: 'm3' }]))
+    await dreamWeekly(OWNER, { ...deps, actor: 'weekly-review' })
+    const open = await openQuestions(host)
+    assert.deepEqual(open.map((p) => p.op.type === 'EntryRetired' && p.op.actor), ['weekly-review'])
+  })
+
   it('drops an add: the review only asks about the entries it compared', async () => {
     const { deps } = await setup(tool([{ op: 'propose', proposes: 'add', kind: 'habit', severity: 'soft', text: 'Prefers early meetings to evenings', cites: 'm2' }]))
     const out = await dreamWeekly(OWNER, deps)

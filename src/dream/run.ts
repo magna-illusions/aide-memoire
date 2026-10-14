@@ -30,6 +30,8 @@ interface DreamDeps {
   /** The subject's calendar day, YYYY-MM-DD. */
   today: string
   now: () => string
+  /** Which job this is, in your words (`nightly-tidy`): every write carries it as its `actor`. */
+  actor?: string
 }
 
 /** What a daily pass did: what each job found, and what the validator accepted, held or refused. */
@@ -88,7 +90,7 @@ async function dreamDaily(owner: string, deps: DreamDeps): Promise<DreamSummary>
   const candidates = dreamPlan({ state, messages, activityDays, records, today: deps.today, now, runId, newId: deps.newId, policy: deps.policy })
   if (candidates.length === 0) return summarise(runId, [], [])
   const outcome = await deps.write(owner, {
-    writer: 'consolidation', runId, now, messages, ops: candidates.map((c) => c.event), base: state,
+    writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now, messages, ops: candidates.map((c) => c.event), base: state,
     dedupeKey: `dream:${runId}`, marker: { type: DREAM_MARKER, payload: { runId, pass: 'daily', operations: candidates.length } },
   })
   return { ...summarise(runId, candidates, outcome.verdicts), duplicate: outcome.duplicate }

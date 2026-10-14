@@ -12,6 +12,7 @@ import { VALIDATION } from './fixture.ts'
 interface HostWrite {
   writer: Writer
   runId?: string
+  actor?: string
   now: string
   messages: Message[]
   ops: EntryEvent[]
@@ -29,7 +30,7 @@ function memoryHost(policy: ValidationPolicy = VALIDATION, context: Partial<Vali
   async function write(_owner: string, w: HostWrite): Promise<DreamWriteOutcome> {
     if (w.dedupeKey && keys.has(w.dedupeKey)) return { verdicts: [], duplicate: true }
     const plan = planWrite(foldEntries(log), {
-      policy, messages: w.messages, writer: w.writer, runId: w.runId, now: w.now, proposalId: () => `p_h${++held}`, ...context,
+      policy, messages: w.messages, writer: w.writer, runId: w.runId, actor: w.actor, now: w.now, proposalId: () => `p_h${++held}`, ...context,
       ops: w.ops, base: w.base, marker: w.marker,
     })
     if (w.dedupeKey && plan.append.length > 0) keys.add(w.dedupeKey)

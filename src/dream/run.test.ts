@@ -70,6 +70,15 @@ describe('dreamDaily', () => {
   })
 })
 
+describe('dreamDaily with an actor', () => {
+  it('writes as that actor, and the entries it adds carry it', async () => {
+    const { host, deps } = await setup()
+    await dreamDaily(OWNER, { ...deps('2026-10-11'), actor: 'nightly-tidy' })
+    const added = (await host.load()).entries.filter((e) => e.writer === 'consolidation')
+    assert.deepEqual(added.map((e) => e.actor), ['nightly-tidy'])
+  })
+})
+
 describe('dreamDaily on a day that is not one', () => {
   it('rejects before it reads anything', async () => {
     const { deps } = await setup()

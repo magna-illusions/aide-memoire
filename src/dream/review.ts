@@ -50,6 +50,8 @@ interface ReviewDeps {
   /** The subject's calendar day, YYYY-MM-DD. */
   today: string
   now: () => string
+  /** Which job this is, in your words (`weekly-review`): every write carries it as its `actor`. */
+  actor?: string
 }
 
 /** What a review did: why it made no call, or what the validator held and refused and what was dropped. */
@@ -91,7 +93,7 @@ async function readyForReview(owner: string, dedupeKey: string, deps: ReviewDeps
 // billed never pays again this period.
 async function claimWeek(owner: string, runId: string, dedupeKey: string, deps: ReviewDeps): Promise<boolean> {
   const marker = { type: DREAM_MARKER, payload: { runId, pass: 'model' } }
-  const out = await deps.write(owner, { writer: 'consolidation', runId, now: deps.now(), messages: [], ops: [], dedupeKey, marker })
+  const out = await deps.write(owner, { writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now: deps.now(), messages: [], ops: [], dedupeKey, marker })
   return !out.duplicate
 }
 
@@ -127,7 +129,7 @@ async function dreamWeekly(owner: string, deps: ReviewDeps): Promise<ReviewSumma
     compared: new Set(ready.pairs.flat().map((e) => e.id)), dismissed, policy: deps.policy,
   })
   const ops = events.slice(0, Math.min(deps.policy.maxOpsPerRun, questionRoom(ready.state, deps.policy)))
-  const write: DreamWrite = { writer: 'consolidation', runId, now, messages: ready.said, ops, base: ready.state }
+  const write: DreamWrite = { writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now, messages: ready.said, ops, base: ready.state }
   const outcome = ops.length === 0 ? { verdicts: [] } : await deps.write(owner, write)
   return {
     runId, noCall: answer === null || answer === undefined, dropped,
