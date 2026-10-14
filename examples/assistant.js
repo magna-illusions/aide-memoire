@@ -22,7 +22,7 @@ const rendering = {
   reviewDue: { header: 'Review due', note: 'Still in force.', checkInNote: 'Ask whether these still apply.' },
 }
 
-// The person's conversation, as your app stores it. They are the principal: role 'subject'.
+// The user's conversation, as your app stores it. Their messages have role 'subject'.
 /** @type {import('aide-memoire').Message[]} */
 const messages = [
   { id: 'm1', role: 'subject', text: 'I live in Lisbon and work remotely most weeks', at: '2026-10-01T09:00:00Z' },

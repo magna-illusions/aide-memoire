@@ -8,11 +8,11 @@
 // database, a queue or a model.
 
 /**
- * The principal: the party whose word settles. The API and every stored event
- * call it `subject` — the person in a conversation, or the responsible role in
- * a ledger (an on-call engineer for a service). A message with role `subject`
- * is the principal's word, and `subject-action` is the principal's own hand.
- * The package never checks who that is; the host decides.
+ * The user: the person in a conversation, or a responsible role in a ledger
+ * (an on-call engineer for a service). The API and every stored event call
+ * them `subject`. A message with role `subject` is the user's, and
+ * `subject-action` is a write your UI makes when the user confirms or submits
+ * a form. The package never checks who the user is; your code decides.
  */
 type Principal = 'subject'
 

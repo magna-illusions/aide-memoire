@@ -1,5 +1,5 @@
 // An incident ledger on the building blocks: alerts are records your code ingests, and the
-// on-call engineer is the principal. src/readme.test.ts runs it and holds its output to the
+// on-call engineer is the user. src/readme.test.ts runs it and holds its output to the
 // lines below `Prints:`.
 
 import { assertionFor, foldEntries, renderEntries, validate } from 'aide-memoire'
@@ -28,7 +28,7 @@ const at = (time) => `2026-10-08T${time}:00Z`
 
 // Machine evidence your host holds, answered by your own lookup, never taken from the event.
 const evidence = new Map([['alert-9912', { id: 'alert-9912', at: at('14:02'), owner: 'checkout-api' }]])
-// The incident channel. The on-call engineer is the principal: role 'subject'.
+// The incident channel. The on-call engineer is the user: role 'subject'.
 /** @type {import('aide-memoire').Message[]} */
 const messages = [
   { id: 'm1', role: 'subject', at: at('14:10'), text: 'Pool is exhausted on checkout, every worker waits on a connection' },

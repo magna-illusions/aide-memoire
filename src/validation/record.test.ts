@@ -102,7 +102,7 @@ describe('a record is never the subject\'s word', () => {
   ])
 })
 
-describe('a record cited by the subject\'s own hand or an operator', () => {
+describe('a record cited by a subject action or an operator', () => {
   table([
     ['a subject action adds on their record', 'subject-action', add(draft('n1', 'black tea every morning', by('subject-action', record('r-new')))), 'accept'],
     ['a subject action closes a hard entry on a newer record', 'subject-action', retire('hard', by('subject-action', record('r-new'))), 'accept'],

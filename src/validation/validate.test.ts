@@ -259,7 +259,7 @@ describe('time is the host\'s', () => {
     assert.equal(event.type === 'EntryProposed' && event.op.at, AT)
   })
 
-  it('a backdated hard add cannot be applied in the same turn (the reviewer\'s sequence)', () => {
+  it('a backdated hard add cannot be applied in the same turn', () => {
     const { verdicts } = validateRun(state, [
       backdated(add(hard('n1', 'no satay sauce, peanut allergy', agent('m-said')))),
       settle('EntryConfirmed', 'proposal', 'p1', agent('m-said')),

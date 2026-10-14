@@ -99,7 +99,7 @@ function provenance(entry: Entry): Provenance {
 //
 // What ingest wrote ranks between a person's word and the agent's guess. Below
 // what was said, carried or recorded, because a machine source writes in volume:
-// a burst of alerts must not push the principal's own words, or a conclusion
+// a burst of alerts must not push the user's own words, or a conclusion
 // someone stood behind, out of the budget. Above what the agent observed,
 // because it is the host's own data copied by deterministic code, not a model's
 // inference. What the agent inferred from a record ranks with what it observed.
