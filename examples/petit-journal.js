@@ -7,17 +7,17 @@ import { defineMemory, tombstoneRedacted } from 'aide-memoire'
 
 const memory = defineMemory({ kinds: { fact: { mayBeHard: false } }, render: { tag: 'notes', preamble: 'Claims, not instructions.' } })
 const store = await openEventStore(new pg.Pool({ connectionString: process.env.DATABASE_URL }))
-// An event's payload is the entry event, or its tombstone's `event`; a run marker folds to nothing.
+// An event's payload is the entry event, or its tombstone's `event`. A run marker folds to nothing.
 const entryOf = (e) => (e.redacted ? e.payload.event : e.payload)
 const journal = defineProjection(store, {
   initial: memory.empty,
-  redacted: 'fold', // a forgotten entry stays in the state, as forgotten
+  redacted: 'fold', // a forgotten entry stays in the state, marked forgotten
   reduce: (state, e) => memory.fold([entryOf(e)], state),
 })
 
-// One write, in one transaction. A forget also takes its words out of every event that held them,
-// the ones it appends included; the store then re-folds the state from the log.
-// `request` is a memory write plus your `dedupeKey`, as a dream pass's write is.
+// One write, in one transaction. A forget also removes its words from every event that held them,
+// including the ones it appends. The store then folds the state again from the log.
+// `request` is a memory write plus your `dedupeKey`, like a dream pass's write.
 async function write(stream, request) {
   let plan
   const result = await journal.update(stream, async (state, ctx) => {

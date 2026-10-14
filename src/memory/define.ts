@@ -7,7 +7,7 @@ import { planWrite, type WritePlan, type WriteRequest } from '../write/plan.ts'
 
 // The front door: one config, bound into the policies the building blocks take,
 // with few and boring defaults. Every default is behaviour only a major release
-// can change, so they are listed once, here, and in the README's table.
+// can change, so they are listed once, here, and in docs/api.md.
 
 // Words too common to show that a message says what an entry claims. English, as
 // the default labels are; replace the list for another language.

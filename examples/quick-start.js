@@ -8,7 +8,7 @@ const memory = defineMemory({
 })
 const now = '2026-10-01T09:00:00Z'
 
-// The agent records what the person said. A hard entry it wrote is held: a question for them.
+// The agent records what the user said. A hard entry from the agent is held as a question.
 const asked = memory.write(memory.empty, {
   writer: 'agent', now, messages: [{ id: 'm1', role: 'subject', text: 'Never book me a flight before 8am', at: now }],
   ops: [add({ id: 'e1', kind: 'rule', severity: 'hard', text: 'Never book a flight before 8am', source: { kind: 'message', id: 'm1' } })],
@@ -16,6 +16,6 @@ const asked = memory.write(memory.empty, {
 // `append` is what your store appends; `state` is the memory after it.
 const [question] = memory.questions(asked.state)
 
-// The person taps "yes" in your UI: their own hand.
+// The user taps "yes" in your UI.
 const answered = memory.write(asked.state, { writer: 'subject-action', now, ops: [apply(question.id, { kind: 'action', id: 'tap-1' })] })
 console.log(memory.render(answered.state, now).text)

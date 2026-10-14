@@ -31,7 +31,7 @@ describe('the README\'s quick start', () => {
 
 describe('the README\'s petit-journal recipe', () => {
   it('is examples/petit-journal.js, the file the typecheck checks', () => {
-    assert.equal(body('petit-journal.js'), shownIn('#### With petit-journal')[1])
+    assert.equal(body('petit-journal.js'), shownIn('### With petit-journal')[1])
   })
 })
 
