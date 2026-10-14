@@ -8,8 +8,9 @@ write requests and defaults, then the building blocks it is made of. The
 
 | | |
 |---|---|
-| `defineMemory({ kinds, render, maxTextLength?, stopwords?, textRules?, caps? })` | A memory: `policy`, `rendering`, `empty`, and the methods below. `kinds` lists the sections in order. `render` needs a `tag` and a `preamble`. See [Defaults](#defaults). |
+| `defineMemory({ kinds, render, maxTextLength?, stopwords?, textRules?, caps?, writers? })` | A memory: `policy`, `rendering`, `empty`, and the methods below. `kinds` lists the sections in order. `render` needs a `tag` and a `preamble`. See [Defaults](#defaults). |
 | `memory.write(state, request)` | A write as data: `{ verdicts, append, forgets, state }`. See [Write requests](#write-requests). |
+| `memory.policyFor(writer)` | The policy that writer is held to: `policy`, with any limits `writers` sets for it. |
 | `memory.fold(events, from?)` | The state a log folds to. |
 | `memory.render(state, now)` | The prompt block: `{ text, omitted, lapsed, reviewDue }`. |
 | `memory.questions(state)` | The questions waiting for the user, hard first, then newest. |
@@ -25,7 +26,8 @@ is, and how its text arrived (both from the writer).
 
 ## Write requests
 
-`memory.write(state, request)` is `planWrite` with the memory's policy bound. The README's
+`memory.write(state, request)` is `planWrite` with the writer's policy bound: the memory's own,
+with any limits `writers` sets for that writer. The README's
 [Storing it](../README.md#storing-it) says what your store does with the result. `request` names
 the `writer` and your clock (`now`), plus:
 
@@ -55,6 +57,7 @@ behaviour, so only a major release changes one.
 | `stopwords` | A small English list (`the`, `and`, `with`, `that`, …): words too common to show that a message says what an entry claims. Replace it for other languages. |
 | `textRules` | none |
 | `caps` | `liveEntries: 50`, `addsPerMessage: 3`, `opsPerRun: 20`. `ingestedEntries` defaults to `liveEntries`. |
+| `writers` | none: every writer gets the memory's limits. `{ migration: { maxTextLength: 1000 } }` gives one writer its own `maxTextLength` or `caps`, merged over the memory's. |
 | `render.sections` | One per kind, in the order `kinds` lists them, headed by the kind's name |
 | `render.otherHeader` | `other` |
 | `render.provenance` | Each label is its own name: `confirmed`, `said`, `relayed`, … |
@@ -63,7 +66,7 @@ behaviour, so only a major release changes one.
 | `render.softBudget` | 2,000 characters |
 | `write`: `messages` | none |
 | `write`: `proposalId` | `p<n>`, numbered after the questions the state already holds |
-| dreaming: derived from the memory | `stopwords`, `addsPerMessage`, `maxOpsPerRun` (from `caps.opsPerRun`) and `protectedKinds` |
+| dreaming: derived from the memory | `stopwords`, `addsPerMessage`, `maxOpsPerRun` (from `caps.opsPerRun`) and `protectedKinds`, with the `consolidation` writer's limits where `writers` sets them |
 | dreaming: `maxOpenQuestions`, `cooldownDays` | 5; 30 days |
 | dreaming: `followUp` | Off until you name its kinds. Then `windowDays: 7`, `horizonDays: 7`. A follow-up's text is clipped to fit `maxTextLength`. |
 | dreaming: `recurrence` | Off until you name its kinds. Then `windowDays: 28`, `share: 0.6`, 3 messages over 2 sessions. |
@@ -75,8 +78,8 @@ behaviour, so only a major release changes one.
 ## Building blocks
 
 `defineMemory` and the operation builders are made of these, and you can use any of them
-directly. `memory.write` binds one policy. For a different policy per writer (different caps,
-say), call `planWrite` directly with each.
+directly. `memory.write` picks the policy by writer, from `writers`. For a policy that differs in
+more than its limits, call `planWrite` with it.
 
 In the building blocks, a question is stored as a proposal: an `EntryProposed` event, listed by
 `openProposals` or `waitingQuestions`. The operation builders produce these events:
