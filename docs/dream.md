@@ -90,6 +90,7 @@ interface DreamDeps {
   policy: DreamPolicy
   today: string                                                  // the user's calendar day
   now: () => string
+  actor?: string                                                 // which job this is: every write carries it
 }
 ```
 
@@ -100,7 +101,7 @@ before an event can read as an answer to it. A time in `Z` reads as a UTC day.
 
 ```ts
 interface ReviewDeps {
-  loadEntries, write, newId, policy, today, now                  // as above
+  loadEntries, write, newId, policy, today, now, actor?          // as above
   loadMessages: (owner, sinceIso) => Promise<Message[]>
   runRecorded?: (owner, dedupeKey) => Promise<boolean>         // optional: skips the reads early
   ask: (prompt: ReviewPrompt, owner) => Promise<unknown>         // the tool call's input, or null
@@ -112,7 +113,8 @@ interface ReviewDeps {
 ### The writer
 
 Your `write` validates `write.ops` as `write.writer` (always `consolidation`), with `write.runId`,
-`write.now` and `write.messages` in the `ValidationContext`, and appends what is let through.
+`write.actor`, `write.now` and `write.messages` in the `ValidationContext`, and appends what is let
+through. `write.actor` is there only when you gave the pass an `actor`.
 
 - A `dedupeKey` makes a second write of the same run a no-op that answers `duplicate: true`.
 - A `marker` is an event appended first, carrying that key: the run's record of itself. The core

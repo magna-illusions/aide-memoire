@@ -36,6 +36,7 @@ the `writer` and your clock (`now`), plus:
 | `owner?`, `records?` | Your record lookup, for operations that cite a `record`. |
 | `external?` | The text came from outside the conversation. |
 | `runId?` | The run a `consolidation` write belongs to. |
+| `actor?` | Which agent or job makes the write, in your words: `forensics-agent`, say. Any writer may name one. It is stamped on every operation let through and kept on the entry, but never rendered. It is not the run: the per-run cap still counts by `runId`. |
 | `base?` | The state the ops were planned from, when it was loaded before a slow step such as a model call. An op that would bring back words forgotten since then, in its text or a reason, is refused. |
 | `marker?` | `{ type, payload }`, appended first: a run's record of itself. The fold skips it. |
 | `prepare?` | `(op, state) => op`: a last change to each operation before it is checked, given the state the ones before it left. |
@@ -118,6 +119,7 @@ Passed on every call.
 | `proposalId` | `(op) => string` | required | Names a held operation. |
 | `external` | boolean | `false` | The text came from outside the conversation. Always held, never hard. |
 | `runId` | string | none | Required for `consolidation`. The per-run cap counts by it. |
+| `actor` | string | none | Which agent or job is writing. Stamped like the writer. An event that names another actor is refused. |
 | `owner`, `records` | string, `(id) => { id, at, owner } \| undefined` | none | Your record lookup. Without both, every `record` citation is refused. |
 
 ### `ValidationPolicy`

@@ -321,8 +321,9 @@ the `reviewDue` header and notes, and `softBudget`. The provenance labels are `c
   missing too.
 
 A validation context on every call (`ValidationContext`): `policy`, `writer`, `external?`,
-`runId` for a consolidation pass, `now`, `proposalId`, `messages`, and, to accept record
-citations (which `ingest` always needs), `owner` and `records`.
+`runId` for a consolidation pass, `actor?` (which agent or job is writing, kept on the entry), `now`,
+`proposalId`, `messages`, and, to accept record citations (which `ingest` always needs), `owner`
+and `records`.
 
 A message lookup. `messages` is the user's conversation as `{ id, role, text, at }`, with `role`
 one of `subject`, `agent` or `operator`, and nothing from other users. A cited id that is not in

@@ -76,7 +76,8 @@ through these terms in a short example.
 
 ### Writers
 
-Your code names the writer on every call. The event never does.
+Your code names the writer on every call. The event never does. A call can also name an `actor`,
+such as `forensics-agent`, to record which agent or job made the write.
 
 | Writer | Who | May |
 |---|---|---|
