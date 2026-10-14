@@ -85,6 +85,29 @@ describe('defineMemory — what you set', () => {
   })
 })
 
+// A long-hand import may need room the agent never gets: limits per writer, over the memory's own.
+describe('defineMemory — limits per writer', () => {
+  const memory = defineMemory({
+    kinds: { fact: { mayBeHard: false } }, render: { tag: 'notes', preamble: 'P' },
+    maxTextLength: 40, caps: { liveEntries: 10 },
+    writers: { migration: { maxTextLength: 120, caps: { opsPerRun: 5 } } },
+  })
+  const long = 'Moved from Oslo to Bergen in the spring, and works from home'
+  const imported = add({ id: 'e1', kind: 'fact', text: long, source: { kind: 'migration', id: 'run-1' } })
+
+  it('holds a writer to its own limits, merged over the memory\'s', () => {
+    assert.deepEqual(memory.policyFor('migration').caps, { liveEntries: 10, addsPerMessage: 3, opsPerRun: 5 })
+    assert.equal(memory.policyFor('migration').maxTextLength, 120)
+    assert.deepEqual(memory.write(memory.empty, { writer: 'migration', now: AT, ops: [imported] }).verdicts.map((v) => v.verdict), ['accept'])
+  })
+
+  it('holds every other writer to the memory\'s', () => {
+    assert.equal(memory.policyFor('agent'), memory.policy)
+    const typed = add({ id: 'e1', kind: 'fact', text: long, source: tap })
+    assert.deepEqual(memory.write(memory.empty, { writer: 'subject-action', now: AT, ops: [typed] }).verdicts, [{ verdict: 'reject', reason: 'over the 40-character cap' }])
+  })
+})
+
 describe('defineMemory — the methods are the building blocks, bound', () => {
   const memory = minimal()
   const log = [{ type: 'EntryAdded' as const, at: AT, entry: { id: 'e1', kind: 'fact', text: 'likes tea', severity: 'soft' as const, source: tap, assertedBy: 'subject' as const, origin: 'action' as const } }]

@@ -1,6 +1,6 @@
 import { emptyState, foldEntries } from '../log/fold.ts'
 import { waitingQuestions } from '../log/questions.ts'
-import type { EntryState, LogEvent, Message, Proposal } from '../log/types.ts'
+import type { EntryState, LogEvent, Message, Proposal, Writer } from '../log/types.ts'
 import { checkRenderPolicy, renderEntries, type RenderPolicy, type Rendering } from '../render.ts'
 import type { KindRule, ValidationContext, ValidationPolicy } from '../validation/validate.ts'
 import { planWrite, type WritePlan, type WriteRequest } from '../write/plan.ts'
@@ -39,6 +39,12 @@ type RenderConfig = Pick<RenderPolicy, 'tag' | 'preamble'>
   & Partial<Omit<RenderPolicy, 'tag' | 'preamble' | 'provenance' | 'reviewDue'>>
   & { provenance?: Partial<RenderPolicy['provenance']>; reviewDue?: Partial<RenderPolicy['reviewDue']> }
 
+/** The limits one writer gets other than the memory's own, each merged over them. */
+interface WriterLimits {
+  maxTextLength?: number
+  caps?: Partial<ValidationPolicy['caps']>
+}
+
 /** One memory's config: its kinds, in the order the block lists them, how the block reads, and any limit you want other than the default. */
 interface MemoryConfig {
   kinds: Record<string, KindRule>
@@ -47,6 +53,8 @@ interface MemoryConfig {
   stopwords?: Iterable<string>
   textRules?: ValidationPolicy['textRules']
   caps?: Partial<ValidationPolicy['caps']>
+  /** Limits for a writer other than the memory's: `{ migration: { maxTextLength: 1000 } }`. */
+  writers?: Partial<Record<Writer, WriterLimits>>
 }
 
 /** A write: who writes, the operations, and your clock. `messages` defaults to none, `proposalId` to `p<n>` after the questions the state holds. */
@@ -63,7 +71,9 @@ interface Memory {
   empty: EntryState
   /** The state a log folds to, from `from` (default `empty`). */
   fold(events: LogEvent[], from?: EntryState): EntryState
-  /** A whole write as data, as `planWrite` with this memory's policy. Your store appends, rewrites and saves. */
+  /** The policy a writer is held to: `policy`, with any limits `writers` sets for it. */
+  policyFor(writer: Writer): ValidationPolicy
+  /** A whole write as data, as `planWrite` with the writer's policy. Your store appends, rewrites and saves. */
   write(state: EntryState, request: MemoryWrite): WritePlan
   /** The prompt block on `now`. */
   render(state: EntryState, now: string): Rendering
@@ -85,6 +95,15 @@ function policyOf(config: MemoryConfig): ValidationPolicy {
     textRules: config.textRules ?? [],
     caps: { ...DEFAULTS.caps, ...config.caps },
   }
+}
+
+function writerPolicies(policy: ValidationPolicy, writers: MemoryConfig['writers'] = {}): (writer: Writer) => ValidationPolicy {
+  const own = new Map(Object.entries(writers).map(([writer, limits]) => [writer, {
+    ...policy,
+    maxTextLength: limits?.maxTextLength ?? policy.maxTextLength,
+    caps: { ...policy.caps, ...limits?.caps },
+  }]))
+  return (writer) => own.get(writer) ?? policy
 }
 
 function renderingOf(config: MemoryConfig): RenderPolicy {
@@ -112,6 +131,7 @@ function questionIds(state: EntryState): ValidationContext['proposalId'] {
 function defineMemory(config: MemoryConfig): Memory {
   checkConfig(config)
   const policy = policyOf(config)
+  const policyFor = writerPolicies(policy, config.writers)
   const rendering = renderingOf(config)
   checkRenderPolicy(rendering)
   return {
@@ -119,12 +139,13 @@ function defineMemory(config: MemoryConfig): Memory {
     rendering,
     empty: emptyState,
     fold: (events, from = emptyState) => foldEntries(events, from),
+    policyFor,
     write: (state, { messages = [], proposalId = questionIds(state), ...request }) =>
-      planWrite(state, { ...request, policy, messages, proposalId }),
+      planWrite(state, { ...request, policy: policyFor(request.writer), messages, proposalId }),
     render: (state, now) => renderEntries(state, now, rendering),
     questions: waitingQuestions,
   }
 }
 
 export { defineMemory }
-export type { Memory, MemoryConfig, MemoryWrite, RenderConfig }
+export type { Memory, MemoryConfig, MemoryWrite, RenderConfig, WriterLimits }

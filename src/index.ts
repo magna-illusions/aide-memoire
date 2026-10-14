@@ -1,7 +1,7 @@
 // The entry log's public surface: what a host imports, and all it needs.
 // The front door: one memory from one config, and the operations to write to it.
 export { defineMemory } from './memory/define.ts'
-export type { Memory, MemoryConfig, MemoryWrite, RenderConfig } from './memory/define.ts'
+export type { Memory, MemoryConfig, MemoryWrite, RenderConfig, WriterLimits } from './memory/define.ts'
 export { add, supersede, retire, apply, discard, confirm, dismiss, forget } from './memory/ops.ts'
 export type { EntrySpec } from './memory/ops.ts'
 // The building blocks it is made of.
