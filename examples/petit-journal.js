@@ -17,7 +17,7 @@ const journal = defineProjection(store, {
 
 // One write, in one transaction. A forget also removes its words from every event that held them,
 // including the ones it appends. The store then folds the state again from the log.
-// `request` is a memory write plus your `dedupeKey`, like a dream pass's write.
+// `request` is a memory write plus your `dedupeKey`, like a background pass's write.
 async function write(stream, request) {
   let plan
   const result = await journal.update(stream, async (state, ctx) => {

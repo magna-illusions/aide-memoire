@@ -15,7 +15,7 @@ The terms in context first:
 | **op** (operation) | One change submitted to the memory: add, supersede, retire, confirm, dismiss, forget, or apply or discard a question. The validator accepts it, rejects it, or holds it as a question. An accepted op becomes an event in the log. |
 | **writer** | The code path that submits an op: `subject-action`, `agent`, `consolidation`, `operator`, `migration` or `ingest`. Your code names it on each call, and it decides what the op may do. `subject-action` is a write your UI makes when the user confirms or submits a form. |
 | **question** | An op a writer may not make alone. It waits until the user answers it with `apply` or `discard`. Stored as a proposal. |
-| **consolidation** | The writer for background passes, such as the `aide-memoire/dream` passes or your own clean-up job. Soft changes go through. Anything hard or protected is held as a question. It never confirms, dismisses or forgets. |
+| **consolidation** | The writer for background passes, such as the daily pass and weekly review in `aide-memoire/passes`, or your own clean-up job. Soft changes go through. Anything hard or protected is held as a question. It never confirms, dismisses or forgets. |
 | **ingest** | The writer for machine evidence: your deterministic code turning a record from your own system (a booking, a sensor reading) into an entry. It never confirms, dismisses or forgets, and its entries render as `ingested`. |
 | **source** | What an entry rests on, such as a message, an action by the user, or a record you hold. |
 | **provenance** | The label each rendered entry carries, saying who claimed it and on what: `confirmed`, `said`, `relayed`, `carried`, `observed`, `recorded`, `inferred` or `ingested`. |

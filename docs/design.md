@@ -434,8 +434,8 @@ src/
   validation/     validate, the writer model and citation checks
   write/          planWrite: a whole write as data, and the guard against forgotten words
   render.ts       the prompt block and provenance
-  text.ts         the text rules and the escape, shared by the validator, the render and dream
-  dream/          the `aide-memoire/dream` subpath: the daily and periodic passes
+  text.ts         the text rules and the escape, shared by the validator, the render and the passes
+  dream/          the `aide-memoire/passes` subpath (also `aide-memoire/dream`): the daily and periodic passes
 examples/         the examples, type-checked against the source and petit-journal's published types
 ```
 
@@ -469,7 +469,7 @@ npm test
   redaction are tested as functions at their boundaries.
 - A seeded fuzz test throws thousands of malformed and near-valid events at the validator and
   the fold, and checks that neither ever throws.
-- A boundary test fails if the package declares a dependency or the core imports the dream
+- A boundary test fails if the package declares a dependency or the core imports the passes
   subpath. The build itself refuses a `node:` import in what ships.
 - The entrypoints test imports and requires the built package by name.
 - A compatibility fixture, a log an early validator wrote along with the state and rendering it

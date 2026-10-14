@@ -1,4 +1,4 @@
-# `aide-memoire/dream`
+# `aide-memoire/passes`
 
 Optional background passes over an entry log, which run when you call them. A pass reads the log
 and what your system knows about the user, and proposes operations on the entries. It never
@@ -11,12 +11,15 @@ client. It has no clock and no randomness either. You inject the reads, the writ
 generator, the clock and, for the periodic review, the model call.
 
 ```ts
-import { dreamDaily, dreamWeekly } from 'aide-memoire/dream'
+import { dailyPass, weeklyReview } from 'aide-memoire/passes'
 ```
+
+The 1.0 names (`aide-memoire/dream`, `defineDreaming`, `dreamDaily`, `dreamWeekly` and the rest)
+still work and are deprecated until 2.0. The [changelog](../CHANGELOG.md) maps each to its new name.
 
 ## Two passes
 
-### Daily, deterministic (`dreamDaily`)
+### Daily, deterministic (`dailyPass`)
 
 There is no model. Five jobs read the same input, and a planner decides how much of what they
 find goes in:
@@ -41,7 +44,7 @@ The planner:
 - asks a question once, then not again within `cooldownDays`, and never again after the user
   said no to it.
 
-### Periodic, with a model (`dreamWeekly`)
+### Periodic, with a model (`weeklyReview`)
 
 The review looks only for contradictions. It pairs live entries of one kind that share a topic
 and are not copies. It sends those entries to the model, with the user's messages that speak of
@@ -52,7 +55,7 @@ question fits, when there are no pairs, or when there are no messages.
 
 The period is `review.everyDays` days, 7 by default. It is named by its first day, counted from a
 Monday (1970-01-05), so the run id is `dream-model-<first day>`. With 7 days, that day is the
-Monday of the ISO week. Call `dreamWeekly` as often as you like (daily, say); the period decides
+Monday of the ISO week. Call `weeklyReview` as often as you like (daily, say); the period decides
 when it runs.
 
 A changed `everyDays` takes effect at once. Today's period gets a new name: going from 7 to 30
@@ -63,9 +66,9 @@ stay as they are, and the renamed period can cost one extra review. A summary th
 ## The API
 
 ```ts
-dreamDaily(owner: string, deps: DreamDeps): Promise<DreamSummary>
-dreamWeekly(owner: string, deps: ReviewDeps): Promise<ReviewSummary>
-dreamPlan(input: DreamInput): Candidate[]            // the daily pass without I/O
+dailyPass(owner: string, deps: DailyDeps): Promise<DailySummary>
+weeklyReview(owner: string, deps: ReviewDeps): Promise<ReviewSummary>
+dailyPlan(input: DailyInput): Candidate[]            // the daily pass without I/O
 reviewPrompt(input: ReviewInput, wording: ReviewWording, kinds: string[]): ReviewPrompt
 reviewOperations(toolInput: unknown, ctx: ReviewContext): { events: EntryEvent[]; dropped: string[] }
 followUpId(eventId) · sameFactAs(id) · duplicateReason(keptId) · keptBy(reason)
@@ -75,19 +78,19 @@ waitingQuestions(state): Proposal[]                   // open, applicable, words
 entriesSection(state, today, subject): string[]       // live entries and waiting questions, escaped, with ids
 entryLine(entry) · proposalLine(proposal)
 operationEvents(toolInput, ctx: OperationContext)     // add/supersede/retire/propose → events; no screening
-DREAM_MARKER = 'DreamRun' · REVIEW_TOOL_NAME = 'record_operations'
+PASS_MARKER = 'DreamRun' · REVIEW_TOOL_NAME = 'record_operations'
 ```
 
 ```ts
-interface DreamDeps {
+interface DailyDeps {
   loadEntries: (owner) => Promise<EntryState>
   loadMessages: (owner, sinceIso) => Promise<SubjectMessage[]>   // the user's own, with `session` where known
   loadCited: (owner, ids) => Promise<Message[]>                  // the sources of live entries, however old
   loadActivityDays: (owner, sinceIso) => Promise<string[]>       // YYYY-MM-DD, "active" as you define it
   loadRecords: ((owner) => Promise<RecordValue[]>) | null        // null: no read path to records
-  write: (owner, write: DreamWrite) => Promise<DreamWriteOutcome>
+  write: (owner, write: PassWrite) => Promise<PassWriteOutcome>
   newId: (prefix: 'entry' | 'proposal') => string
-  policy: DreamPolicy
+  policy: PassPolicy
   today: string                                                  // the user's calendar day
   now: () => string
   actor?: string                                                 // which job this is: every write carries it
@@ -141,18 +144,21 @@ schema, where the API supports it.
 
 A failed or hung call loses that period's review. The period is claimed before the call, so it is
 paid for at most once. If `ask` throws, the error propagates and the review is not tried again
-until the next period. If `ask` never settles, `dreamWeekly` never does either. The package sets
+until the next period. If `ask` never settles, `weeklyReview` never does either. The package sets
 no timeout of its own, so `ask` must enforce one (an `AbortSignal.timeout` on the client call,
 say) and throw when it passes.
 
 ### The policy
 
-`defineDreaming(memory, overrides?)` builds the `DreamPolicy`. It takes the memory's stopwords,
+`definePasses(memory, overrides?)` builds the `PassPolicy`. It takes the memory's stopwords,
 caps and protected kinds, uses the [defaults](api.md#defaults) for the rest, and merges each part
-with what you set. It holds every number and every piece of wording the jobs use: the stopwords,
-the caps, the follow-up kinds and text, the check-in reason, the protected kinds, what counts as
-a copy, the recurrence thresholds, the review's windows and period (`everyDays`), and the reality
-kind, unit, tolerance and text.
+with what you set. Where the memory sets limits for the `consolidation` writer, the caps and text
+length are that writer's.
+
+The policy holds every number and every piece of wording the jobs use: the stopwords, the caps,
+the follow-up kinds and text, the check-in reason, the protected kinds, what counts as a copy,
+the recurrence thresholds, the review's windows and period (`everyDays`), and the reality kind,
+unit, tolerance and text.
 
 `ReviewWording` holds the words the review prompt uses: whose memory it reads, what the user is
 called, your extra rules (which language to write in, and what never to end on time alone), and
@@ -214,12 +220,12 @@ service. `ledger.test.ts` asserts them as they stand.
   digit. A range, another unit or two values are left alone.
 - Broken config throws a `TypeError`. These are config checks, not verdicts on data; everything
   else returns a result rather than throwing.
-  - An empty `reality.unit`, since without a unit every number would read as a value. `dreamPlan`
-    throws, and `dreamDaily` rejects, the first time the reality job reads an entry against
+  - An empty `reality.unit`, since without a unit every number would read as a value. `dailyPlan`
+    throws, and `dailyPass` rejects, the first time the reality job reads an entry against
     records.
-  - A `review.everyDays` that is not a whole number of days, 1 or more. `dreamWeekly` rejects
+  - A `review.everyDays` that is not a whole number of days, 1 or more. `weeklyReview` rejects
     before it reads anything.
   - A `today` that is not a real calendar day as `YYYY-MM-DD` (`2026-02-29` is not). Every pass
     refuses it before it reads anything.
-  - `defineDreaming` refuses a `followUp.kind` (when `followUp.kinds` is set) or a `reality.kind`
+  - `definePasses` refuses a `followUp.kind` (when `followUp.kinds` is set) or a `reality.kind`
     the memory does not have, and a `reality.kind` without a `reality.unit`.

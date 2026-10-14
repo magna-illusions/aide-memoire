@@ -124,7 +124,7 @@ const journal = defineProjection(store, {
 
 // One write, in one transaction. A forget also removes its words from every event that held them,
 // including the ones it appends. The store then folds the state again from the log.
-// `request` is a memory write plus your `dedupeKey`, like a dream pass's write.
+// `request` is a memory write plus your `dedupeKey`, like a background pass's write.
 async function write(stream, request) {
   let plan
   const result = await journal.update(stream, async (state, ctx) => {
@@ -150,7 +150,7 @@ async function write(stream, request) {
 }
 ```
 
-`write(stream, request)` returns `{ verdicts, duplicate }`, the shape the dream passes expect
+`write(stream, request)` returns `{ verdicts, duplicate }`, the shape the background passes expect
 from their `write` dependency. Read the state with `journal.state(stream)`.
 
 - If every operation is refused, nothing is appended, with or without a dedupe key.
@@ -164,7 +164,7 @@ from their `write` dependency. Read the state with `journal.state(stream)`.
 
 Not a store: it does no I/O, and you keep the events. Not a retriever: there are no embeddings or
 search, and the block holds the live entries, trimmed to a budget by provenance and age. Not an
-LLM client: the dream review calls the `ask` function you pass in. Not an identity or fact check:
+LLM client: the weekly review calls the `ask` function you pass in. Not an identity or fact check:
 your code says who the user is, and a false sentence the user said is still recorded as theirs.
 
 Search-based memory stores retrieve by similarity. aide-mémoire keeps who said what, so an agent
@@ -188,7 +188,7 @@ can't turn its own guess into a fact.
 
 - [docs/api.md](https://github.com/magna-illusions/aide-memoire/blob/main/docs/api.md): the operations, write requests, defaults and building blocks.
 - [docs/design.md](https://github.com/magna-illusions/aide-memoire/blob/main/docs/design.md): why it is shaped this way, every rule, and the security model.
-- [docs/dream.md](https://github.com/magna-illusions/aide-memoire/blob/main/docs/dream.md): `aide-memoire/dream`, optional background passes that tidy a log on your schedule. They write only through your writer, as `consolidation`.
+- [docs/passes.md](https://github.com/magna-illusions/aide-memoire/blob/main/docs/passes.md): `aide-memoire/passes`, optional background passes that tidy a log on your schedule. They write only through your writer, as `consolidation`.
 - [`examples/`](https://github.com/magna-illusions/aide-memoire/tree/main/examples): the quick start, a personal assistant, an incident ledger where alerts are records, and the petit-journal adapter above.
 
 ## License

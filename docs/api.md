@@ -48,7 +48,7 @@ Forgetting an entry also blocks re-adding its follow-up (`fu-<id>`), and the rev
 
 ## Defaults
 
-What `defineMemory` and `defineDreaming` fill in when you leave a setting out. A default is
+What `defineMemory` and `definePasses` fill in when you leave a setting out. A default is
 behaviour, so only a major release changes one.
 
 | Setting | Default |
@@ -66,14 +66,14 @@ behaviour, so only a major release changes one.
 | `render.softBudget` | 2,000 characters |
 | `write`: `messages` | none |
 | `write`: `proposalId` | `p<n>`, numbered after the questions the state already holds |
-| dreaming: derived from the memory | `stopwords`, `addsPerMessage`, `maxOpsPerRun` (from `caps.opsPerRun`) and `protectedKinds`, with the `consolidation` writer's limits where `writers` sets them |
-| dreaming: `maxOpenQuestions`, `cooldownDays` | 5; 30 days |
-| dreaming: `followUp` | Off until you name its kinds. Then `windowDays: 7`, `horizonDays: 7`. A follow-up's text is clipped to fit `maxTextLength`. |
-| dreaming: `recurrence` | Off until you name its kinds. Then `windowDays: 28`, `share: 0.6`, 3 messages over 2 sessions. |
-| dreaming: `reality` | Off until you name its kind. Then `tolerance: 0.15`. A correction's text carries its unit. |
-| dreaming: `checkIn` | On: a hard entry not mentioned for 6 weeks while the user was active in 3 of them |
-| dreaming: `duplicate` | Off until you name `duplicate.negations`, your language's "not" and "never". Then `share: 0.8`. |
-| dreaming: `review` | Every 7 days, reading 28 days of messages and 90 days of dismissals, `repeatShare: 0.6` |
+| passes: derived from the memory | `stopwords`, `addsPerMessage`, `maxOpsPerRun` (from `caps.opsPerRun`) and `protectedKinds`, with the `consolidation` writer's limits where `writers` sets them |
+| passes: `maxOpenQuestions`, `cooldownDays` | 5; 30 days |
+| passes: `followUp` | Off until you name its kinds. Then `windowDays: 7`, `horizonDays: 7`. A follow-up's text is clipped to fit `maxTextLength`. |
+| passes: `recurrence` | Off until you name its kinds. Then `windowDays: 28`, `share: 0.6`, 3 messages over 2 sessions. |
+| passes: `reality` | Off until you name its kind. Then `tolerance: 0.15`. A correction's text carries its unit. |
+| passes: `checkIn` | On: a hard entry not mentioned for 6 weeks while the user was active in 3 of them |
+| passes: `duplicate` | Off until you name `duplicate.negations`, your language's "not" and "never". Then `share: 0.8`. |
+| passes: `review` | Every 7 days, reading 28 days of messages and 90 days of dismissals, `repeatShare: 0.6` |
 
 ## Building blocks
 
