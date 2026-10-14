@@ -13,7 +13,7 @@ and what you expected instead.
 ## In scope
 
 - Stored text that renders as structure: closing the block, opening a section, or forging a
-  provenance tag such as `confirmed` or `must hold`.
+  provenance tag such as `confirmed` or your hard label.
 - An operation the validator accepts that its rules refuse: a writer doing what it may not, a
   citation that should not check out, a hard change without an action.
 - A forget that leaves the forgotten words in what `tombstoneRedacted`, the fold or the rendering
@@ -22,7 +22,7 @@ and what you expected instead.
   proportion to it.
 - A review prompt in which a message can pass for a speaker or an instruction.
 
-Out of scope: what the package documents as yours, such as who the principal is, what your
+Out of scope: what the package documents as yours, such as who the user is, what your
 `records` lookup answers, copies outside the log, and your store's own history (see the README's
 Limits).
 
