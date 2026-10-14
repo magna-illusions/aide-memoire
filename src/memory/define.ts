@@ -53,7 +53,7 @@ interface MemoryConfig {
   stopwords?: Iterable<string>
   textRules?: ValidationPolicy['textRules']
   caps?: Partial<ValidationPolicy['caps']>
-  /** Limits for a writer other than the memory's: `{ migration: { maxTextLength: 1000 } }`. */
+  /** Limits per writer, where one needs other than the memory's: `{ migration: { maxTextLength: 1000 } }`. */
   writers?: Partial<Record<Writer, WriterLimits>>
 }
 
