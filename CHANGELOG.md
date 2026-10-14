@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.1.0 (2026-10-14)
+
+Everything here is additive. Code written for 1.0 and logs stored by it behave as before.
+
+- `actor` on a write: which agent or job made it, in your words (`forensics-agent`). Any writer
+  may name one. The validator stamps it on every operation it lets through, as it stamps the
+  writer and the run, and refuses an event that names another. It is kept on the entry and never
+  rendered. It is not the run: the per-run cap still counts by `runId`. The background passes take
+  one in their deps.
+- `writers` in `defineMemory`: limits for one writer other than the memory's, such as
+  `{ migration: { maxTextLength: 1000 } }`. `memory.write` holds each writer to its own, and
+  `memory.policyFor(writer)` returns it. `definePasses` takes its caps and text length from the
+  `consolidation` writer's.
+- Plain names for the background passes, at `aide-memoire/passes`. The 1.0 names, and
+  `aide-memoire/dream`, still work and are deprecated until 2.0. Each is the same function, value
+  or type as its new name:
+
+  | 1.0 | 1.1 |
+  |---|---|
+  | `aide-memoire/dream` | `aide-memoire/passes` |
+  | `defineDreaming`, `DreamingOverrides` | `definePasses`, `PassOverrides` |
+  | `dreamDaily`, `DreamDeps`, `DreamSummary` | `dailyPass`, `DailyDeps`, `DailySummary` |
+  | `dreamPlan`, `DreamInput` | `dailyPlan`, `DailyInput` |
+  | `dreamWeekly` | `weeklyReview` |
+  | `DreamPolicy`, `DreamWrite`, `DreamWriteOutcome` | `PassPolicy`, `PassWrite`, `PassWriteOutcome` |
+  | `DREAM_MARKER` | `PASS_MARKER` |
+
+  Stored strings keep their names: the marker type is still `DreamRun`, and run ids are still
+  `dream-<day>` and `dream-model-<period>`. docs/dream.md is now docs/passes.md.
+
 ## 1.0.0 (2026-10-13)
 
 First release. aide-mémoire was developed inside a private codebase, where it runs in production.

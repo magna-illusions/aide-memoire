@@ -1,6 +1,6 @@
 {
   "name": "aide-memoire",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A typed, provenance-carrying memory log for AI agents: entries, a writer model, proposals, redaction and an escaped, budgeted prompt rendering. Pure functions, no dependencies.",
   "keywords": [
     "ai-agent",
