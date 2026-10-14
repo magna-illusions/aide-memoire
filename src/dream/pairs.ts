@@ -3,7 +3,7 @@ import { isLapsed } from '../log/lapse.ts'
 import { sharesContentWords } from '../text.ts'
 import type { Entry, EntryState, Message } from '../log/types.ts'
 import { saysTheSame } from './similar.ts'
-import type { DreamPolicy } from './types.ts'
+import type { PassPolicy } from './types.ts'
 
 // What the weekly review is shown: only two live entries of one kind that share
 // a topic word can contradict each other, so only those pairs are sent, with
@@ -17,16 +17,16 @@ import type { DreamPolicy } from './types.ts'
 
 type Pair = [Entry, Entry]
 
-function isCopy(a: Entry, b: Entry, policy: DreamPolicy): boolean {
+function isCopy(a: Entry, b: Entry, policy: PassPolicy): boolean {
   return a.severity === b.severity && saysTheSame(a.text, b.text, policy)
 }
 
-function mayContradict(a: Entry, b: Entry, policy: DreamPolicy): boolean {
+function mayContradict(a: Entry, b: Entry, policy: PassPolicy): boolean {
   return a.kind === b.kind && sharesContentWords(a.text, b.text, policy.stopwords) && !isCopy(a, b, policy)
 }
 
 /** Every pair of live entries the review should compare, oldest first within a pair. */
-function contradictionPairs(state: EntryState, today: string, policy: DreamPolicy): Pair[] {
+function contradictionPairs(state: EntryState, today: string, policy: PassPolicy): Pair[] {
   const live = liveEntries(state).filter((e) => !e.redacted && !isLapsed(e, today))
   return live.flatMap((a, i) => live.slice(i + 1).filter((b) => mayContradict(a, b, policy)).map((b): Pair => [a, b]))
 }
@@ -41,7 +41,7 @@ function pairedState(state: EntryState, pairs: Pair[]): EntryState {
 }
 
 /** The messages that speak of a paired entry: the only ones a supersede or retire of it could cite. */
-function speakingOf<T extends Message>(messages: T[], pairs: Pair[], policy: DreamPolicy): T[] {
+function speakingOf<T extends Message>(messages: T[], pairs: Pair[], policy: PassPolicy): T[] {
   const texts = pairs.flat().map((e) => e.text)
   return messages.filter((m) => texts.some((text) => sharesContentWords(text, m.text, policy.stopwords)))
 }

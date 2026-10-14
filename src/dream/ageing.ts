@@ -5,7 +5,7 @@ import type { Entry, EntryRetired, EntryState } from '../log/types.ts'
 import { askedAbout } from './asked.ts'
 import { addDays, dayOf } from './days.ts'
 import { mentionsAfter } from './mentions.ts'
-import type { Candidate, DreamInput } from './types.ts'
+import type { Candidate, DailyInput } from './types.ts'
 
 // "Ageing hard entries": a restriction the subject has not mentioned for N
 // weeks while they go on being active → the agent checks in. Never
@@ -25,7 +25,7 @@ function weekHasActivity(days: string[], today: string, week: number): boolean {
 }
 
 /** Active in at least `activeWeeks` of the last `quietWeeks` weeks. */
-function activityGoesOn(input: DreamInput): boolean {
+function activityGoesOn(input: DailyInput): boolean {
   const { quietWeeks, activeWeeks } = input.policy.checkIn
   const weeks = Array.from({ length: quietWeeks }, (_, week) => week)
   return weeks.filter((week) => weekHasActivity(input.activityDays, input.today, week)).length >= activeWeeks
@@ -41,13 +41,13 @@ function lastSaid(entry: Entry, state: EntryState): string {
   return days.sort().at(-1)!
 }
 
-function checkIn(entry: Entry, input: DreamInput): EntryRetired {
+function checkIn(entry: Entry, input: DailyInput): EntryRetired {
   const by = assertionFor('consolidation', { kind: 'session', id: input.runId })
   const reason = input.policy.checkIn.reason(input.policy.checkIn.quietWeeks)
   return { type: 'EntryRetired', at: input.now, id: entry.id, reason, ...by, runId: input.runId }
 }
 
-function checkIns(input: DreamInput): Candidate[] {
+function checkIns(input: DailyInput): Candidate[] {
   if (!activityGoesOn(input)) return []
   const { state, today, messages, policy } = input
   const quietSince = addDays(today, -7 * policy.checkIn.quietWeeks)

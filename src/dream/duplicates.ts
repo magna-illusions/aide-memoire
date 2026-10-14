@@ -6,7 +6,7 @@ import { addDays } from './days.ts'
 import { mentionsAfter } from './mentions.ts'
 import { duplicateReason, keptBy } from './names.ts'
 import { saysTheSame } from './similar.ts'
-import type { Candidate, DreamInput } from './types.ts'
+import type { Candidate, DailyInput } from './types.ts'
 
 // Duplicates, without a model: two live entries of one kind and one severity
 // whose content words overlap by the policy's share, with the same numbers and
@@ -27,20 +27,20 @@ import type { Candidate, DreamInput } from './types.ts'
 // one may cite the pass itself, as a check-in does; without a message, a soft
 // pair waits.
 
-function sameThing(a: Entry, b: Entry, input: DreamInput): boolean {
+function sameThing(a: Entry, b: Entry, input: DailyInput): boolean {
   return a.kind === b.kind && a.severity === b.severity && saysTheSame(a.text, b.text, input.policy)
 }
 
-function isHeld(entry: Entry, input: DreamInput): boolean {
+function isHeld(entry: Entry, input: DailyInput): boolean {
   return entry.severity === 'hard' || input.policy.protectedKinds.includes(entry.kind)
 }
 
-function citationFor(older: Entry, kept: Entry, input: DreamInput): Message | undefined {
+function citationFor(older: Entry, kept: Entry, input: DailyInput): Message | undefined {
   const speaking = mentionsAfter(older.text, input.messages, older.at, input.policy.stopwords)
   return speaking.find((m) => kept.source.kind === 'message' && m.id === kept.source.id) ?? speaking[0]
 }
 
-function sourceFor(older: Entry, kept: Entry, input: DreamInput): Source | undefined {
+function sourceFor(older: Entry, kept: Entry, input: DailyInput): Source | undefined {
   const cited = citationFor(older, kept, input)
   if (cited) return { kind: 'message', id: cited.id }
   return isHeld(older, input) ? { kind: 'session', id: input.runId } : undefined
@@ -48,18 +48,18 @@ function sourceFor(older: Entry, kept: Entry, input: DreamInput): Source | undef
 
 const isCopyQuestion = (op: ProposableOp) => op.type === 'EntryRetired' && keptBy(op.reason) !== null
 
-function unasked(older: Entry, kept: Entry, input: DreamInput): boolean {
+function unasked(older: Entry, kept: Entry, input: DailyInput): boolean {
   const { state } = input
   const cooledSince = addDays(input.today, -input.policy.cooldownDays)
   return !declinedFor(state, older.id, isCopyQuestion) && !askedAbout(state, older.id, cooledSince) && !askedAbout(state, kept.id)
 }
 
-function retired(older: Entry, kept: Entry, source: Source, input: DreamInput): EntryRetired {
+function retired(older: Entry, kept: Entry, source: Source, input: DailyInput): EntryRetired {
   const by = { ...assertionFor('consolidation', source), runId: input.runId }
   return { type: 'EntryRetired', at: input.now, id: older.id, reason: duplicateReason(kept.id), ...by }
 }
 
-function duplicateOf(older: Entry, later: Entry[], input: DreamInput): Candidate[] {
+function duplicateOf(older: Entry, later: Entry[], input: DailyInput): Candidate[] {
   const kept = later.filter((e) => sameThing(older, e, input)).at(-1)
   if (!kept || !unasked(older, kept, input)) return []
   const source = sourceFor(older, kept, input)
@@ -70,7 +70,7 @@ function duplicateOf(older: Entry, later: Entry[], input: DreamInput): Candidate
  * Every older copy, ended in favour of the newest: `tidy` is applied by policy, `questions` held for the subject.
  * Off while `duplicate.negations` is empty: without its language's "not", "never X" would read as a copy of "X".
  */
-function duplicates(input: DreamInput): { tidy: Candidate[]; questions: Candidate[] } {
+function duplicates(input: DailyInput): { tidy: Candidate[]; questions: Candidate[] } {
   if (input.policy.duplicate.negations.size === 0) return { tidy: [], questions: [] }
   const live = liveEntries(input.state).filter((e) => !e.redacted)
   const found = live.flatMap((older, i) => duplicateOf(older, live.slice(i + 1), input))

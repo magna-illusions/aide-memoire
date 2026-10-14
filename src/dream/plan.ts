@@ -6,7 +6,7 @@ import { duplicates } from './duplicates.ts'
 import { realitySync } from './reality.ts'
 import { recurrences } from './recurrence.ts'
 import { followUps } from './time-sync.ts'
-import type { Candidate, DreamInput, DreamPolicy } from './types.ts'
+import type { Candidate, DailyInput, PassPolicy } from './types.ts'
 
 // One day's deterministic pass: every job reads the same input and says what it
 // would submit; this decides how much of it goes in. No model, no I/O.
@@ -22,7 +22,7 @@ import type { Candidate, DreamInput, DreamPolicy } from './types.ts'
 // - a correction resting on a record alone comes last (reality.ts).
 
 /** How many more questions may be asked before the open ones reach the policy's ceiling. */
-function questionRoom(state: EntryState, policy: DreamPolicy): number {
+function questionRoom(state: EntryState, policy: PassPolicy): number {
   return Math.max(0, policy.maxOpenQuestions - waitingQuestions(state).length)
 }
 
@@ -31,7 +31,7 @@ function onePerEntry(candidates: Candidate[]): Candidate[] {
 }
 
 /** What one day's pass would submit, in order, within the policy's caps. */
-function dreamPlan(input: DreamInput): Candidate[] {
+function dailyPlan(input: DailyInput): Candidate[] {
   calendarDay(input.today)
   const copies = duplicates(input)
   const reality = realitySync(input)
@@ -42,4 +42,4 @@ function dreamPlan(input: DreamInput): Candidate[] {
   return [...found.filter((c) => actions.includes(c)), ...asked].slice(0, input.policy.maxOpsPerRun)
 }
 
-export { dreamPlan, questionRoom }
+export { dailyPlan, questionRoom }

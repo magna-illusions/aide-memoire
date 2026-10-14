@@ -1,5 +1,5 @@
 import { contentWords, normaliseText, sameStem } from '../text.ts'
-import type { DreamPolicy } from './types.ts'
+import type { PassPolicy } from './types.ts'
 
 // How much two entry texts say the same thing: the share of the shorter one's
 // content words the other holds. Read on the shorter side so a rewording that
@@ -43,7 +43,7 @@ function negates(text: string, negations: Set<string>): boolean {
 }
 
 /** Whether two entry texts are one fact in other words: the duplicate share, the same numbers, the same yes or no. */
-function saysTheSame(a: string, b: string, policy: Pick<DreamPolicy, 'stopwords' | 'duplicate'>): boolean {
+function saysTheSame(a: string, b: string, policy: Pick<PassPolicy, 'stopwords' | 'duplicate'>): boolean {
   const { share, negations } = policy.duplicate
   return overlap(a, b, policy.stopwords) >= share && numbers(a) === numbers(b) && negates(a, negations) === negates(b, negations)
 }

@@ -1,21 +1,21 @@
 import type { Memory } from '../memory/define.ts'
 import { normaliseText } from '../text.ts'
-import type { DreamPolicy } from './types.ts'
+import type { PassPolicy } from './types.ts'
 
-// The dream policy for a memory: what a pass shares with it is derived (its
+// The pass policy for a memory: what a pass shares with it is derived (its
 // stopwords, its caps, its protected kinds), and the rest is a default. Every
 // job that needs your words or your kinds (follow-ups, corrections from
 // records, recurrence, tidying copies) stays off until you name them; the one
 // that needs neither (check-ins on quiet hard entries) runs as it is.
 
-/** What you set of a dream policy: any part, each merged over the defaults. */
-type DreamingOverrides = Partial<Omit<DreamPolicy, 'followUp' | 'checkIn' | 'duplicate' | 'recurrence' | 'review' | 'reality'>> & {
-  followUp?: Partial<DreamPolicy['followUp']>
-  checkIn?: Partial<DreamPolicy['checkIn']>
-  duplicate?: Partial<DreamPolicy['duplicate']>
-  recurrence?: Partial<DreamPolicy['recurrence']>
-  review?: Partial<DreamPolicy['review']>
-  reality?: Partial<DreamPolicy['reality']>
+/** What you set of a pass policy: any part, each merged over the defaults. */
+type PassOverrides = Partial<Omit<PassPolicy, 'followUp' | 'checkIn' | 'duplicate' | 'recurrence' | 'review' | 'reality'>> & {
+  followUp?: Partial<PassPolicy['followUp']>
+  checkIn?: Partial<PassPolicy['checkIn']>
+  duplicate?: Partial<PassPolicy['duplicate']>
+  recurrence?: Partial<PassPolicy['recurrence']>
+  review?: Partial<PassPolicy['review']>
+  reality?: Partial<PassPolicy['reality']>
 }
 
 const FOLLOW_UP_TAIL = (date: string) => `: the day (${date}) has passed, and how it went is not known yet`
@@ -39,7 +39,7 @@ function clipped(text: string, max: number): string {
 // The defaults, for a memory's text cap and the reality unit you set: a follow-up
 // quotes its event clipped so the whole line fits the cap, and a correction says
 // its value with the unit, so the reality job reads it back.
-function defaults(maxTextLength: number, unit: string): Omit<DreamPolicy, 'stopwords' | 'addsPerMessage' | 'maxOpsPerRun' | 'protectedKinds'> {
+function defaults(maxTextLength: number, unit: string): Omit<PassPolicy, 'stopwords' | 'addsPerMessage' | 'maxOpsPerRun' | 'protectedKinds'> {
   return {
     maxOpenQuestions: 5,
     cooldownDays: 30,
@@ -57,7 +57,7 @@ function defaults(maxTextLength: number, unit: string): Omit<DreamPolicy, 'stopw
   }
 }
 
-function checkDreaming(policy: DreamPolicy, kinds: string[]): void {
+function checkPasses(policy: PassPolicy, kinds: string[]): void {
   if (policy.followUp.kinds.length > 0 && !kinds.includes(policy.followUp.kind)) {
     throw new TypeError(`followUp.kind must be one of the memory's kinds, got ${JSON.stringify(policy.followUp.kind)}`)
   }
@@ -67,17 +67,17 @@ function checkDreaming(policy: DreamPolicy, kinds: string[]): void {
 }
 
 /**
- * The dream policy for a memory: its stopwords, caps and protected kinds derived
+ * The pass policy for a memory: its stopwords, caps and protected kinds derived
  * (from the `consolidation` writer's limits, where the memory sets them), the rest
  * defaults, each part merged with what you set.
  */
-function defineDreaming(memory: Pick<Memory, 'policy'> & Partial<Pick<Memory, 'policyFor'>>, overrides: DreamingOverrides = {}): DreamPolicy {
+function definePasses(memory: Pick<Memory, 'policy'> & Partial<Pick<Memory, 'policyFor'>>, overrides: PassOverrides = {}): PassPolicy {
   // A pass writes as `consolidation`, so it plans within what that writer is held to.
   const held = memory.policyFor?.('consolidation') ?? memory.policy
   const { kinds, stopwords, caps } = held
   const { followUp, checkIn, duplicate, recurrence, review, reality, ...top } = overrides
   const base = defaults(held.maxTextLength, reality?.unit ?? '')
-  const policy: DreamPolicy = {
+  const policy: PassPolicy = {
     ...base,
     stopwords,
     addsPerMessage: caps.addsPerMessage,
@@ -91,9 +91,9 @@ function defineDreaming(memory: Pick<Memory, 'policy'> & Partial<Pick<Memory, 'p
     review: { ...base.review, ...review },
     reality: { ...base.reality, ...reality },
   }
-  checkDreaming(policy, Object.keys(kinds))
+  checkPasses(policy, Object.keys(kinds))
   return policy
 }
 
-export { defineDreaming }
-export type { DreamingOverrides }
+export { definePasses }
+export type { PassOverrides }

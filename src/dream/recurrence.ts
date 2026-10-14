@@ -6,7 +6,7 @@ import { askedAbout, declinedFor } from './asked.ts'
 import { addDays } from './days.ts'
 import { hasRoom } from './mentions.ts'
 import { holds } from './similar.ts'
-import type { Candidate, DreamInput, SubjectMessage } from './types.ts'
+import type { Candidate, DailyInput, SubjectMessage } from './types.ts'
 
 // Promotion of what keeps being said, without a model. An entry the agent only
 // observed, which the subject has since said in the policy's number of messages
@@ -26,19 +26,19 @@ import type { Candidate, DreamInput, SubjectMessage } from './types.ts'
 // theirs. Asked once: not while a question about it is open, not within the
 // cooldown, and never after a "no".
 
-function isObserved(entry: Entry, input: DreamInput): boolean {
+function isObserved(entry: Entry, input: DailyInput): boolean {
   return entry.severity === 'soft' && !entry.redacted && !entry.until && provenance(entry) === 'observed'
     && entry.source.kind !== 'record'
     && input.policy.recurrence.kinds.includes(entry.kind)
 }
 
-function unasked(entry: Entry, input: DreamInput): boolean {
+function unasked(entry: Entry, input: DailyInput): boolean {
   const isStillTrue = (op: ProposableOp) => op.type === 'EntrySuperseded' && op.entry.text === entry.text
   return !declinedFor(input.state, entry.id, isStillTrue) && !askedAbout(input.state, entry.id, addDays(input.today, -input.policy.cooldownDays))
 }
 
 /** The subject's messages in the window, with a session, that say the entry: newest first. */
-function sayings(entry: Entry, input: DreamInput): SubjectMessage[] {
+function sayings(entry: Entry, input: DailyInput): SubjectMessage[] {
   const { recurrence, stopwords } = input.policy
   const since = addDays(input.today, -recurrence.windowDays)
   return input.messages
@@ -46,12 +46,12 @@ function sayings(entry: Entry, input: DreamInput): SubjectMessage[] {
     .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
 }
 
-function recurs(said: SubjectMessage[], input: DreamInput): boolean {
+function recurs(said: SubjectMessage[], input: DailyInput): boolean {
   const { messages, sessions } = input.policy.recurrence
   return said.length >= messages && new Set(said.map((m) => m.session)).size >= sessions
 }
 
-function stillTrue(entry: Entry, cited: SubjectMessage, input: DreamInput): EntryProposed {
+function stillTrue(entry: Entry, cited: SubjectMessage, input: DailyInput): EntryProposed {
   const by = { ...assertionFor('consolidation', { kind: 'message', id: cited.id }), runId: input.runId }
   return {
     type: 'EntryProposed', at: input.now, id: input.newId('proposal'), reason: 'the subject keeps saying it',
@@ -62,7 +62,7 @@ function stillTrue(entry: Entry, cited: SubjectMessage, input: DreamInput): Entr
   }
 }
 
-function recurrences(input: DreamInput): Candidate[] {
+function recurrences(input: DailyInput): Candidate[] {
   return liveEntries(input.state)
     .filter((e) => isObserved(e, input) && unasked(e, input))
     .flatMap((e) => {

@@ -6,8 +6,8 @@ import { contradictionPairs, pairedState, speakingOf, type Pair } from './pairs.
 import { questionRoom } from './plan.ts'
 import { reviewOperations } from './review-operations.ts'
 import { reviewPrompt, type ReviewInput, type ReviewPrompt, type ReviewWording } from './review-prompt.ts'
-import { DREAM_MARKER } from './run.ts'
-import type { DreamPolicy, DreamWrite, DreamWriteOutcome } from './types.ts'
+import { PASS_MARKER } from './run.ts'
+import type { PassPolicy, PassWrite, PassWriteOutcome } from './types.ts'
 
 // The periodic model review, weekly by default (`review.everyDays`):
 // contradictions only — copies and things said again are the daily pass's,
@@ -23,7 +23,7 @@ import type { DreamPolicy, DreamWrite, DreamWriteOutcome } from './types.ts'
 // renamed (7 to 30 on 2026-10-13 makes it 2026-10-08), the names already stored
 // are left as they are, and the renamed period can cost one extra review.
 
-/** What `dreamWeekly` is given: the host's reads, writer, ids, policy, model call, day and clock. */
+/** What `weeklyReview` is given: the host's reads, writer, ids, policy, model call, day and clock. */
 interface ReviewDeps {
   loadEntries: (owner: string) => Promise<EntryState>
   /** The subject's own messages since an ISO time. */
@@ -38,12 +38,12 @@ interface ReviewDeps {
    * answers with the input of the tool call the model made, or null when it made
    * none. Whatever it throws propagates, after the period is claimed, so a failed
    * call loses that period's review. Enforce your own timeout: one that never
-   * settles holds `dreamWeekly` open with it.
+   * settles holds `weeklyReview` open with it.
    */
   ask: (prompt: ReviewPrompt, owner: string) => Promise<unknown>
-  write: (owner: string, write: DreamWrite) => Promise<DreamWriteOutcome>
+  write: (owner: string, write: PassWrite) => Promise<PassWriteOutcome>
   newId: (prefix: 'entry' | 'proposal') => string
-  policy: DreamPolicy
+  policy: PassPolicy
   /** The validator's kinds: the tool offers these, and an entry is hard only where its kind may be. */
   kinds: Record<string, KindRule>
   wording: ReviewWording
@@ -92,7 +92,7 @@ async function readyForReview(owner: string, dedupeKey: string, deps: ReviewDeps
 // on the period, so a second sweep, a restart, or a call that fails after it was
 // billed never pays again this period.
 async function claimWeek(owner: string, runId: string, dedupeKey: string, deps: ReviewDeps): Promise<boolean> {
-  const marker = { type: DREAM_MARKER, payload: { runId, pass: 'model' } }
+  const marker = { type: PASS_MARKER, payload: { runId, pass: 'model' } }
   const out = await deps.write(owner, { writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now: deps.now(), messages: [], ops: [], dedupeKey, marker })
   return !out.duplicate
 }
@@ -112,7 +112,7 @@ function reviewInput(
 }
 
 /** One subject's review for the period `deps.today` falls in: the ISO week, unless `review.everyDays` says otherwise. */
-async function dreamWeekly(owner: string, deps: ReviewDeps): Promise<ReviewSummary> {
+async function weeklyReview(owner: string, deps: ReviewDeps): Promise<ReviewSummary> {
   const runId = `dream-model-${periodOf(calendarDay(deps.today), deps.policy.review.everyDays ?? 7)}`
   const dedupeKey = `dream:${runId}`
   const none = { runId, proposed: 0, rejected: [], dropped: [] }
@@ -129,7 +129,7 @@ async function dreamWeekly(owner: string, deps: ReviewDeps): Promise<ReviewSumma
     compared: new Set(ready.pairs.flat().map((e) => e.id)), dismissed, policy: deps.policy,
   })
   const ops = events.slice(0, Math.min(deps.policy.maxOpsPerRun, questionRoom(ready.state, deps.policy)))
-  const write: DreamWrite = { writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now, messages: ready.said, ops, base: ready.state }
+  const write: PassWrite = { writer: 'consolidation', runId, ...(deps.actor ? { actor: deps.actor } : {}), now, messages: ready.said, ops, base: ready.state }
   const outcome = ops.length === 0 ? { verdicts: [] } : await deps.write(owner, write)
   return {
     runId, noCall: answer === null || answer === undefined, dropped,
@@ -138,5 +138,5 @@ async function dreamWeekly(owner: string, deps: ReviewDeps): Promise<ReviewSumma
   }
 }
 
-export { dreamWeekly }
+export { weeklyReview }
 export type { ReviewDeps, ReviewSummary }

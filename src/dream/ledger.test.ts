@@ -4,8 +4,8 @@ import { foldEntries, findEntry, openProposals } from '../log/fold.ts'
 import { validateRun, type ValidationContext, type ValidationPolicy } from '../validation/validate.ts'
 import { assertionFor } from '../validation/writer.ts'
 import type { EntryEvent, EntryState, HostRecord } from '../log/types.ts'
-import { dreamPlan } from './plan.ts'
-import type { DreamInput, DreamPolicy, RecordValue } from './types.ts'
+import { dailyPlan } from './plan.ts'
+import type { DailyInput, PassPolicy, RecordValue } from './types.ts'
 import { counter } from './fixtures/host.ts'
 
 // The same pass over a ledger rather than a conversation: the subject is a
@@ -22,7 +22,7 @@ const VALIDATION: ValidationPolicy = {
   caps: { liveEntries: 50, addsPerMessage: 3, opsPerRun: 20 },
 }
 
-const POLICY: DreamPolicy = {
+const POLICY: PassPolicy = {
   stopwords: STOPWORDS, addsPerMessage: 3, maxOpsPerRun: 5, maxOpenQuestions: 5, cooldownDays: 30,
   followUp: { kinds: [], windowDays: 7, horizonDays: 3, kind: 'baseline', text: (text, date) => `Passed ${date}: ${text}` },
   checkIn: { quietWeeks: 4, activeWeeks: 2, reason: (weeks) => `no word on it for ${weeks} weeks while deploys go on` },
@@ -47,12 +47,12 @@ const history = foldEntries([
 const ALERT: RecordValue = { label: 'checkout latency', value: 900, day: '2026-10-06', id: 'alert-17', at: '2026-10-06T08:00:00Z' }
 const deploys = ['2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05']
 
-function plan(records: RecordValue[]): ReturnType<typeof dreamPlan> {
-  const input: DreamInput = {
+function plan(records: RecordValue[]): ReturnType<typeof dailyPlan> {
+  const input: DailyInput = {
     state: history, messages: [], activityDays: deploys, records, today: '2026-10-07', now: '2026-10-07T03:00:00Z',
     runId: 'dream-2026-10-07', newId: counter(), policy: POLICY,
   }
-  return dreamPlan(input)
+  return dailyPlan(input)
 }
 
 function submit(events: EntryEvent[], context: Partial<ValidationContext> = {}) {
@@ -109,9 +109,9 @@ describe('a ledger subject: a follow-up on the record a dated event rests on', (
     entry: { id: 'window', kind: 'window', text: 'Payments database maintenance window', severity: 'soft', until: '2026-10-05',
       ...assertionFor('ingest', { kind: 'record', id: TICKET.id, at: TICKET.at }) },
   }])
-  const policy = (citeRecords?: boolean): DreamPolicy => ({ ...POLICY,
+  const policy = (citeRecords?: boolean): PassPolicy => ({ ...POLICY,
     followUp: { ...POLICY.followUp, kinds: ['window'], kind: 'follow-up', ...(citeRecords === undefined ? {} : { citeRecords }) } })
-  const planned = (citeRecords?: boolean) => dreamPlan({
+  const planned = (citeRecords?: boolean) => dailyPlan({
     state: ingested, messages: [], activityDays: deploys, records: [], today: '2026-10-07', now: '2026-10-07T03:00:00Z',
     runId: 'dream-2026-10-07', newId: counter(), policy: policy(citeRecords),
   })

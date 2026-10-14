@@ -2,7 +2,7 @@ import { foldEntries } from '../../log/fold.ts'
 import type { ValidationContext, ValidationPolicy } from '../../validation/validate.ts'
 import { planWrite } from '../../write/plan.ts'
 import type { EntryEvent, EntryState, LogEvent, Message, Writer } from '../../log/types.ts'
-import type { DreamWriteOutcome } from '../types.ts'
+import type { PassWriteOutcome } from '../types.ts'
 import { VALIDATION } from './fixture.ts'
 
 // The least a host does around a pass, in memory: plan the write (planWrite),
@@ -27,7 +27,7 @@ function memoryHost(policy: ValidationPolicy = VALIDATION, context: Partial<Vali
   const markers: NonNullable<HostWrite['marker']>[] = []
   let held = 0
 
-  async function write(_owner: string, w: HostWrite): Promise<DreamWriteOutcome> {
+  async function write(_owner: string, w: HostWrite): Promise<PassWriteOutcome> {
     if (w.dedupeKey && keys.has(w.dedupeKey)) return { verdicts: [], duplicate: true }
     const plan = planWrite(foldEntries(log), {
       policy, messages: w.messages, writer: w.writer, runId: w.runId, actor: w.actor, now: w.now, proposalId: () => `p_h${++held}`, ...context,

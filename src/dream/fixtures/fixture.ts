@@ -4,7 +4,7 @@ import type { ValidationPolicy, Verdict } from '../../validation/validate.ts'
 import type {
   Assertion, EntryAdded, EntryDismissed, EntryDraft, EntryRedacted, EntryRetired, EntrySuperseded, LogEvent, Message, Settles,
 } from '../../log/types.ts'
-import type { DreamPolicy, Job, RecordValue, SubjectMessage } from '../types.ts'
+import type { PassPolicy, Job, RecordValue, SubjectMessage } from '../types.ts'
 
 // A dreaming fixture: what the log holds, what the subject said and did, and
 // what one day's deterministic pass must submit — each operation by the job
@@ -63,7 +63,7 @@ const VALIDATION: ValidationPolicy = {
   caps: { liveEntries: 120, addsPerMessage: 3, opsPerRun: 25 },
 }
 
-const POLICY: DreamPolicy = {
+const POLICY: PassPolicy = {
   stopwords: STOPWORDS,
   addsPerMessage: 3,
   maxOpsPerRun: 3,

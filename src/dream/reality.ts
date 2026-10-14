@@ -5,7 +5,7 @@ import type { Entry, EntryProposed, Source } from '../log/types.ts'
 import { askedAbout } from './asked.ts'
 import { addDays, dayOf } from './days.ts'
 import { mentionsAfter } from './mentions.ts'
-import type { Candidate, DreamInput, RecordValue } from './types.ts'
+import type { Candidate, DailyInput, RecordValue } from './types.ts'
 
 // "Reality": a value in memory checked against the host's records. Where the
 // newest record of the same thing is further from the entry's value than the
@@ -55,25 +55,25 @@ function valueOf(text: string, unit: string): number | null {
   return found.length === 1 ? parse(found[0][1]) : null
 }
 
-function newestRecord(entry: Entry, input: DreamInput): RecordValue | undefined {
+function newestRecord(entry: Entry, input: DailyInput): RecordValue | undefined {
   return (input.records ?? [])
     .filter((r) => r.day > dayOf(entry.at) && sharesContentWords(r.label, entry.text, input.policy.stopwords))
     .sort((a, b) => b.day.localeCompare(a.day) || b.value - a.value)[0]
 }
 
-function reportOf(record: RecordValue, entry: Entry, input: DreamInput): Source | undefined {
+function reportOf(record: RecordValue, entry: Entry, input: DailyInput): Source | undefined {
   const report = mentionsAfter(record.label, input.messages, entry.at, input.policy.stopwords)
     .find((m) => (m.text.match(NUMBER) ?? []).some((n) => parse(n) === record.value))
   return report ? { kind: 'message', id: report.id } : undefined
 }
 
-function citationFor(record: RecordValue, entry: Entry, input: DreamInput): Source | undefined {
+function citationFor(record: RecordValue, entry: Entry, input: DailyInput): Source | undefined {
   const report = reportOf(record, entry, input)
   if (report) return report
   return input.policy.reality.citeRecords && record.id && record.at ? { kind: 'record', id: record.id, at: record.at } : undefined
 }
 
-function correction(entry: Entry, record: RecordValue, cited: Source, input: DreamInput): EntryProposed {
+function correction(entry: Entry, record: RecordValue, cited: Source, input: DailyInput): EntryProposed {
   const by = { ...assertionFor('consolidation', cited), runId: input.runId }
   const text = input.policy.reality.text(record.label, record.value, record.day)
   return {
@@ -85,7 +85,7 @@ function correction(entry: Entry, record: RecordValue, cited: Source, input: Dre
   }
 }
 
-function disagreement(entry: Entry, input: DreamInput): Candidate[] {
+function disagreement(entry: Entry, input: DailyInput): Candidate[] {
   const { unit, tolerance } = input.policy.reality
   const value = valueOf(entry.text, unit)
   const record = value === null ? undefined : newestRecord(entry, input)
@@ -99,7 +99,7 @@ function restsOnRecord(c: Candidate): boolean {
 }
 
 /** Corrections the subject reported, and the ones resting on a record alone. */
-function realitySync(input: DreamInput): { reported: Candidate[]; recorded: Candidate[] } {
+function realitySync(input: DailyInput): { reported: Candidate[]; recorded: Candidate[] } {
   if (!input.records) return { reported: [], recorded: [] }
   const { state, policy } = input
   const cooledSince = addDays(input.today, -policy.cooldownDays)

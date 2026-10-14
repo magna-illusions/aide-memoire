@@ -20,12 +20,17 @@ const FUNCTIONS = [
   'defineMemory', 'add', 'supersede', 'retire', 'apply', 'discard', 'confirm', 'dismiss', 'forget',
 ]
 const EXPORTS = [...FUNCTIONS, 'emptyState']
-const DREAM_FUNCTIONS = [
-  'defineDreaming', 'dreamPlan', 'dreamDaily', 'dreamWeekly', 'waitingQuestions', 'reviewPrompt', 'reviewOperations',
+// The background passes' plain names, each with the 1.0 name it replaces. The
+// old names stay until 2.0 as the same function or value, never a copy.
+const RENAMED = {
+  definePasses: 'defineDreaming', dailyPlan: 'dreamPlan', dailyPass: 'dreamDaily', weeklyReview: 'dreamWeekly', PASS_MARKER: 'DREAM_MARKER',
+}
+const PASS_FUNCTIONS = [
+  'definePasses', 'dailyPlan', 'dailyPass', 'weeklyReview', 'waitingQuestions', 'reviewPrompt', 'reviewOperations',
   'operationEvents', 'entriesSection', 'entryLine', 'proposalLine',
   'followUpId', 'sameFactAs', 'duplicateReason', 'keptBy',
 ]
-const DREAM_EXPORTS = [...DREAM_FUNCTIONS, 'DREAM_MARKER', 'REVIEW_TOOL_NAME']
+const PASS_EXPORTS = [...PASS_FUNCTIONS, 'PASS_MARKER', 'REVIEW_TOOL_NAME', ...Object.values(RENAMED)]
 
 describe('published entrypoints', () => {
   it('exposes the whole API to both import and require', () => {
@@ -51,21 +56,32 @@ describe('published entrypoints', () => {
     assert.deepEqual(Object.keys(dist).sort(), [...EXPORTS].sort())
   })
 
-  it('exposes the dream subpath to both import and require, and nothing beyond it', async () => {
-    const dreamEsm = await import('aide-memoire/dream')
-    const dreamCjs = require('aide-memoire/dream')
-    const dist = await import('../dist/dream/index.js')
-    for (const name of DREAM_FUNCTIONS) {
-      assert.equal(typeof dreamEsm[name], 'function', `import of the dream subpath is missing ${name}`)
-      assert.equal(dreamEsm[name], dreamCjs[name], `${name} differs between import and require of the dream subpath`)
-    }
-    for (const keys of [Object.keys(dreamEsm), Object.keys(dreamCjs), Object.keys(dist)]) {
-      assert.deepEqual(keys.sort(), [...DREAM_EXPORTS].sort())
-    }
-    assert.deepEqual([dreamCjs.DREAM_MARKER, dreamCjs.REVIEW_TOOL_NAME], ['DreamRun', 'record_operations'])
-    // What both entry points export is one function, not two copies.
-    assert.equal(dreamEsm.waitingQuestions, esm.waitingQuestions)
-    assert.equal(dreamEsm.sameFactAs, esm.sameFactAs)
+  for (const subpath of ['aide-memoire/passes', 'aide-memoire/dream']) {
+    it(`exposes ${subpath} to both import and require, and nothing beyond it`, async () => {
+      const passesEsm = await import(subpath)
+      const passesCjs = require(subpath)
+      const dist = await import('../dist/dream/index.js')
+      for (const name of PASS_FUNCTIONS) {
+        assert.equal(typeof passesEsm[name], 'function', `import of ${subpath} is missing ${name}`)
+        assert.equal(passesEsm[name], passesCjs[name], `${name} differs between import and require of ${subpath}`)
+      }
+      for (const keys of [Object.keys(passesEsm), Object.keys(passesCjs), Object.keys(dist)]) {
+        assert.deepEqual(keys.sort(), [...PASS_EXPORTS].sort())
+      }
+      // The marker's stored type and the tool's name are data: a rename never moves them.
+      assert.deepEqual([passesCjs.PASS_MARKER, passesCjs.REVIEW_TOOL_NAME], ['DreamRun', 'record_operations'])
+      for (const [name, old] of Object.entries(RENAMED)) {
+        assert.equal(passesEsm[old], passesEsm[name], `${old} is not ${name}`)
+      }
+      // What both entry points export is one function, not two copies.
+      assert.equal(passesEsm.waitingQuestions, esm.waitingQuestions)
+      assert.equal(passesEsm.sameFactAs, esm.sameFactAs)
+    })
+  }
+
+  it('resolves both subpaths to one implementation', async () => {
+    assert.equal((await import('aide-memoire/passes')).dailyPass, (await import('aide-memoire/dream')).dailyPass)
+    assert.equal(require('aide-memoire/passes').dailyPass, require('aide-memoire/dream').dailyPass)
   })
 
   it('exports its package.json, for tools that read the version', () => {

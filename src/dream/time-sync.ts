@@ -4,7 +4,7 @@ import type { Entry, EntryAdded, Source } from '../log/types.ts'
 import { addDays, dayOf } from './days.ts'
 import { hasRoom, mentionsAfter, mentionsOnOrAfter } from './mentions.ts'
 import { followUpId } from './names.ts'
-import type { Candidate, DreamInput } from './types.ts'
+import type { Candidate, DailyInput } from './types.ts'
 
 // "Time": a passed event becomes a follow-up, then history.
 //
@@ -22,7 +22,7 @@ import type { Candidate, DreamInput } from './types.ts'
 // - one already followed up: the follow-up's id is derived from the event's, so
 //   a second pass finds it, and the validator refuses a reused id anyway.
 
-function isRecentEvent(entry: Entry, input: DreamInput): boolean {
+function isRecentEvent(entry: Entry, input: DailyInput): boolean {
   const { kinds, windowDays } = input.policy.followUp
   const until = entry.until
   if (entry.severity !== 'soft' || entry.redacted || !until || !kinds.includes(entry.kind)) return false
@@ -35,7 +35,7 @@ function isRecentEvent(entry: Entry, input: DreamInput): boolean {
 // cap, so the validator does not refuse it for that. Where there is none and the
 // host opted in (`citeRecords`), the record the event itself rests on: how a
 // subject that never writes, such as a service, gets a follow-up at all.
-function citationFor(event: Entry, input: DreamInput): Source | undefined {
+function citationFor(event: Entry, input: DailyInput): Source | undefined {
   const { stopwords, addsPerMessage, followUp: policy } = input.policy
   const { source } = event
   const own = source.kind === 'message' ? input.messages.filter((m) => m.id === source.id) : []
@@ -46,7 +46,7 @@ function citationFor(event: Entry, input: DreamInput): Source | undefined {
   return onRecord ? { ...source } : undefined
 }
 
-function followUp(event: Entry, cited: Source, input: DreamInput): EntryAdded {
+function followUp(event: Entry, cited: Source, input: DailyInput): EntryAdded {
   const { followUp: policy } = input.policy
   const by = assertionFor('consolidation', cited)
   return {
@@ -57,7 +57,7 @@ function followUp(event: Entry, cited: Source, input: DreamInput): EntryAdded {
   }
 }
 
-function followUps(input: DreamInput): Candidate[] {
+function followUps(input: DailyInput): Candidate[] {
   const { state, messages, policy } = input
   return liveEntries(state)
     .filter((e) => isRecentEvent(e, input) && !findEntry(state, followUpId(e.id)))

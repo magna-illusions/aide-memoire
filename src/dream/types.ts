@@ -1,7 +1,7 @@
 import type { EntryEvent, EntryState, Message } from '../log/types.ts'
 import type { Verdict } from '../validation/validate.ts'
 
-// What a dreaming pass reads, and what it hands the validator. The
+// What a background pass reads, and what it hands the validator. The
 // deterministic jobs are pure functions of this: no model, no I/O, no clock,
 // so a day's run can be replayed from the same input and a fixture is only data.
 
@@ -35,7 +35,7 @@ interface SubjectMessage extends Message {
  * `consolidation` writer, so the validator still decides what is applied, held
  * or refused; this only says what to ask, how often, and how much.
  */
-interface DreamPolicy {
+interface PassPolicy {
   /** Words that say nothing about which entry a message is about: the validator's, plus the host's filler. */
   stopwords: Set<string>
   /** The validator's entries-per-message cap: a pass cites a message with room left under it. */
@@ -122,7 +122,7 @@ interface DreamPolicy {
 }
 
 /** What the daily pass reads, all of it loaded: state, messages, activity, records, day and policy. */
-interface DreamInput {
+interface DailyInput {
   state: EntryState
   /** The subject's own messages over the window the jobs look back on: the only ones a pass may cite. */
   messages: SubjectMessage[]
@@ -138,7 +138,7 @@ interface DreamInput {
   runId: string
   /** The host's id generator, for the entries and proposals a job builds. */
   newId: (prefix: 'entry' | 'proposal') => string
-  policy: DreamPolicy
+  policy: PassPolicy
 }
 
 /** The daily jobs, by name. */
@@ -153,7 +153,7 @@ interface Candidate {
 }
 
 /** What a pass hands the host's writer: one call, as the `consolidation` writer. */
-interface DreamWrite {
+interface PassWrite {
   writer: 'consolidation'
   runId: string
   /** Which job this is, as you named it in the pass's deps: the validator stamps it on every operation. */
@@ -172,10 +172,10 @@ interface DreamWrite {
 }
 
 /** What the host's writer answers: each operation's verdict, and whether the write was a duplicate. */
-interface DreamWriteOutcome {
+interface PassWriteOutcome {
   verdicts: Verdict[]
   /** The dedupe key was seen before: nothing was validated or appended. */
   duplicate?: boolean
 }
 
-export type { RecordValue, SubjectMessage, DreamPolicy, DreamInput, Job, Candidate, DreamWrite, DreamWriteOutcome }
+export type { RecordValue, SubjectMessage, PassPolicy, DailyInput, Job, Candidate, PassWrite, PassWriteOutcome }

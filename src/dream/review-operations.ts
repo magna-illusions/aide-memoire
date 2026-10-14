@@ -3,7 +3,7 @@ import { assertionFor } from '../validation/writer.ts'
 import type { KindRule } from '../validation/validate.ts'
 import type { Assertion, EntryDraft, EntryEvent, ProposableOp } from '../log/types.ts'
 import { repeatsDismissed, type Dismissed } from './dismissed.ts'
-import type { DreamPolicy } from './types.ts'
+import type { PassPolicy } from './types.ts'
 
 // What a model recorded through an operations tool, as operations for the
 // validator (writer `consolidation`), which still decides what is appended,
@@ -39,7 +39,7 @@ interface ReviewContext {
   compared: Set<string>
   /** What the subject already said no to: never asked again. */
   dismissed: Dismissed[]
-  policy: DreamPolicy
+  policy: PassPolicy
 }
 
 type Fields = Record<string, unknown>

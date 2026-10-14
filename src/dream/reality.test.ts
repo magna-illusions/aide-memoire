@@ -2,9 +2,9 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { foldEntries } from '../log/fold.ts'
 import type { LogEvent } from '../log/types.ts'
-import { dreamPlan } from './plan.ts'
+import { dailyPlan } from './plan.ts'
 import { valueOf } from './reality.ts'
-import type { DreamInput, DreamPolicy, RecordValue } from './types.ts'
+import type { DailyInput, PassPolicy, RecordValue } from './types.ts'
 import { add, entry, inSession, observed, POLICY, said, subject } from './fixtures/fixture.ts'
 import { counter } from './fixtures/host.ts'
 
@@ -25,15 +25,15 @@ const messages = [
   inSession('s3', subject('m3', '2026-10-04', 'Long video calls again and a headache after')),
 ]
 
-function plan(policy: DreamPolicy) {
-  const input: DreamInput = {
+function plan(policy: PassPolicy) {
+  const input: DailyInput = {
     state: foldEntries(history), messages, activityDays: [], records: [LOGGED], today: '2026-10-07',
     now: '2026-10-07T03:00:00Z', runId: 'dream-2026-10-07', newId: counter(), policy,
   }
-  return dreamPlan(input).map((c) => [c.job, c.about])
+  return dailyPlan(input).map((c) => [c.job, c.about])
 }
 
-const citing = (on: boolean): DreamPolicy => ({ ...POLICY, reality: { ...POLICY.reality, citeRecords: on } })
+const citing = (on: boolean): PassPolicy => ({ ...POLICY, reality: { ...POLICY.reality, citeRecords: on } })
 
 describe('a correction resting on a record', () => {
   it('is not built unless the host opts in: without a report from the subject, nothing', () => {

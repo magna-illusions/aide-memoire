@@ -30,6 +30,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./passes": {
+      "types": "./dist/dream/index.d.ts",
+      "default": "./dist/dream/index.js"
+    },
     "./dream": {
       "types": "./dist/dream/index.d.ts",
       "default": "./dist/dream/index.js"

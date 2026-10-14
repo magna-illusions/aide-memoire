@@ -5,8 +5,8 @@ import { renderEntries } from '../render.ts'
 import { validateRun } from '../validation/validate.ts'
 import type { EntryState } from '../log/types.ts'
 import { addDays } from './days.ts'
-import { dreamPlan } from './plan.ts'
-import type { Candidate, DreamInput } from './types.ts'
+import { dailyPlan } from './plan.ts'
+import type { Candidate, DailyInput } from './types.ts'
 import { DREAM_FIXTURES } from './fixtures/index.ts'
 import { POLICY, RENDER, VALIDATION, type DreamFixture } from './fixtures/fixture.ts'
 
@@ -14,7 +14,7 @@ import { POLICY, RENDER, VALIDATION, type DreamFixture } from './fixtures/fixtur
 // day's pass, submit what it found through the validator as the consolidation
 // writer, then read what a reader would see.
 
-function inputFor(fixture: DreamFixture, state: EntryState, today: string): DreamInput {
+function inputFor(fixture: DreamFixture, state: EntryState, today: string): DailyInput {
   let n = 0
   return {
     state, today, now: `${today}T03:00:00Z`, runId: `dream-${today}`, policy: POLICY,
@@ -23,7 +23,7 @@ function inputFor(fixture: DreamFixture, state: EntryState, today: string): Drea
   }
 }
 
-function submit(input: DreamInput, candidates: Candidate[]) {
+function submit(input: DailyInput, candidates: Candidate[]) {
   let held = 0
   return validateRun(input.state, candidates.map((c) => c.event), {
     policy: VALIDATION, messages: input.messages, writer: 'consolidation', runId: input.runId,
@@ -38,7 +38,7 @@ function askedAbout(state: EntryState): string[] {
 for (const fixture of DREAM_FIXTURES) {
   describe(fixture.name, () => {
     const input = inputFor(fixture, foldEntries(fixture.history), fixture.today)
-    const candidates = dreamPlan(input)
+    const candidates = dailyPlan(input)
     const { verdicts, state } = submit(input, candidates)
 
     it('submits what the jobs should find, and the validator lets it through as expected', () => {
@@ -63,15 +63,15 @@ for (const fixture of DREAM_FIXTURES) {
 
     if (fixture.quietNextDay) {
       it('the next day the pass submits nothing', () => {
-        assert.deepEqual(dreamPlan(inputFor(fixture, state, addDays(fixture.today, 1))), [])
+        assert.deepEqual(dailyPlan(inputFor(fixture, state, addDays(fixture.today, 1))), [])
       })
     }
   })
 }
 
-describe('dreamPlan on a day that is not one', () => {
+describe('dailyPlan on a day that is not one', () => {
   it('throws, as a broken input', () => {
     const [fixture] = DREAM_FIXTURES
-    assert.throws(() => dreamPlan(inputFor(fixture, foldEntries(fixture.history), '2026-02-29')), { name: 'TypeError', message: /today must be a calendar day/ })
+    assert.throws(() => dailyPlan(inputFor(fixture, foldEntries(fixture.history), '2026-02-29')), { name: 'TypeError', message: /today must be a calendar day/ })
   })
 })
