@@ -66,11 +66,17 @@ function checkDreaming(policy: DreamPolicy, kinds: string[]): void {
   if (policy.reality.unit.trim() === '') throw new TypeError('reality.unit must name a unit when reality.kind is set')
 }
 
-/** The dream policy for a memory: its stopwords, caps and protected kinds derived, the rest defaults, each part merged with what you set. */
-function defineDreaming(memory: Pick<Memory, 'policy'>, overrides: DreamingOverrides = {}): DreamPolicy {
-  const { kinds, stopwords, caps } = memory.policy
+/**
+ * The dream policy for a memory: its stopwords, caps and protected kinds derived
+ * (from the `consolidation` writer's limits, where the memory sets them), the rest
+ * defaults, each part merged with what you set.
+ */
+function defineDreaming(memory: Pick<Memory, 'policy'> & Partial<Pick<Memory, 'policyFor'>>, overrides: DreamingOverrides = {}): DreamPolicy {
+  // A pass writes as `consolidation`, so it plans within what that writer is held to.
+  const held = memory.policyFor?.('consolidation') ?? memory.policy
+  const { kinds, stopwords, caps } = held
   const { followUp, checkIn, duplicate, recurrence, review, reality, ...top } = overrides
-  const base = defaults(memory.policy.maxTextLength, reality?.unit ?? '')
+  const base = defaults(held.maxTextLength, reality?.unit ?? '')
   const policy: DreamPolicy = {
     ...base,
     stopwords,

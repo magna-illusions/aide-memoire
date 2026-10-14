@@ -22,6 +22,16 @@ describe('defineDreaming — derived from the memory', () => {
     assert.equal(dreaming.stopwords, memory.policy.stopwords)
     assert.deepEqual([dreaming.addsPerMessage, dreaming.maxOpsPerRun, dreaming.protectedKinds], [2, 7, ['rule']])
   })
+
+  it('takes them from the consolidation writer\'s limits, where the memory sets its own', () => {
+    const limited = defineMemory({
+      kinds: { note: { mayBeHard: false } }, render: { tag: 'notes', preamble: 'P' }, maxTextLength: 200,
+      writers: { consolidation: { maxTextLength: 120, caps: { opsPerRun: 4 } } },
+    })
+    const dreaming = defineDreaming(limited, { followUp: { kinds: ['note'], kind: 'note' } })
+    assert.equal(dreaming.maxOpsPerRun, 4)
+    assert.equal(dreaming.followUp.text('x'.repeat(200), '2026-10-10').length, 120)
+  })
 })
 
 describe('defineDreaming — the defaults', () => {
