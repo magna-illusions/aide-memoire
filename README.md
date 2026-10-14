@@ -7,7 +7,9 @@ Memory for AI agents that records where every fact came from. Each entry says wh
 on what evidence. Each write is checked by rules you can read and test. The agent reads a block
 rendered from the log, escaped and kept to a size budget, rather than notes it rewrote itself.
 
-It was extracted from an application where it runs in production.
+aide-mémoire was developed inside a private codebase, where it runs in production. The earlier
+history is tied to that code, so this repository starts from a single commit. Everything after
+it happens here in the open.
 
 ## Install
 

@@ -2,10 +2,12 @@
 
 ## 1.0.0 (2026-10-13)
 
-First release.
+First release. aide-mémoire was developed inside a private codebase, where it runs in production.
+The earlier history is tied to that code, so this repository starts from a single commit.
+Everything after it happens here in the open.
 
 - `defineMemory(config)`: one memory from one config (its kinds, how its block reads, its limits),
-  with few defaults, all listed in the README. `memory.write`, `fold`, `render` and `questions`
+  with few defaults, all listed in docs/api.md. `memory.write`, `fold`, `render` and `questions`
   are the building blocks with its policies bound.
 - Operation builders: `add`, `supersede`, `retire`, `apply`, `discard`, `confirm`, `dismiss` and
   `forget`, emitting the event types below exactly, minus what the validator stamps (`at`, and
@@ -20,7 +22,7 @@ First release.
   the state to save. With `base`, an operation that would bring back words forgotten since is
   refused. A `prepare(op, state)` hook has the last word on each operation. The dedupe key stays
   with your store.
-- Provenance on every entry: who claimed it, on what evidence, and whether the principal confirmed
+- Provenance on every entry: who claimed it, on what evidence, and whether the user confirmed
   it; `provenance(entry)` names it.
 - Forgetting one entry: `EntryRedacted`, `tombstoneRedacted` and `wordingsForgottenBy`. The README
   shows the whole adapter onto petit-journal.
