@@ -38,6 +38,7 @@ function assertionProblem(by: Shape): string | null {
   if (!isSource(by.source)) return 'malformed source'
   if (!isOneOf(by.assertedBy, PARTIES) || !isOneOf(by.origin, ORIGINS)) return 'malformed assertion'
   if (!isOptional(by.writer, (w) => isOneOf(w, WRITERS)) || !isOptional(by.runId, isText)) return 'malformed assertion'
+  if (!isOptional(by.actor, isText)) return 'malformed assertion'
   return null
 }
 
@@ -91,7 +92,7 @@ function sourceOf(source: Source): Source {
 
 function assertionOf(by: Assertion): Assertion {
   return withoutUndefined({
-    source: sourceOf(by.source), assertedBy: by.assertedBy, origin: by.origin, writer: by.writer, runId: by.runId,
+    source: sourceOf(by.source), assertedBy: by.assertedBy, origin: by.origin, writer: by.writer, runId: by.runId, actor: by.actor,
   })
 }
 

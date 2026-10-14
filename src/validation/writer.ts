@@ -27,6 +27,8 @@ interface WriterContext {
   external?: boolean
   /** One consolidation pass, as the host names it. */
   runId?: string
+  /** Which agent or job is writing, as the host names it: `forensics-agent`, `nightly-tidy`. Any writer may name one. */
+  actor?: string
 }
 
 /** The assertion a writer's operation carries. Hosts build operations with it. */
@@ -72,12 +74,15 @@ function writerMismatch(event: EntryEvent, ctx: WriterContext): string | null {
   for (const field of ['assertedBy', 'origin', 'writer'] as const) {
     if (declared[field] !== undefined && declared[field] !== expected[field]) return `writer mismatch: ${field}`
   }
-  return declared.runId !== undefined && declared.runId !== ctx.runId ? 'writer mismatch: runId' : null
+  for (const field of ['runId', 'actor'] as const) {
+    if (declared[field] !== undefined && declared[field] !== ctx[field]) return `writer mismatch: ${field}`
+  }
+  return null
 }
 
 function stamp<T extends Assertion>(assertion: T, ctx: WriterContext): T {
   const { assertedBy, origin, writer } = assertionFor(ctx.writer, assertion.source, ctx.external)
-  return { ...assertion, assertedBy, origin, writer, ...(ctx.runId ? { runId: ctx.runId } : {}) }
+  return { ...assertion, assertedBy, origin, writer, ...(ctx.runId ? { runId: ctx.runId } : {}), ...(ctx.actor ? { actor: ctx.actor } : {}) }
 }
 
 /** The event as it will be stored: its assertion stamped with the host's writer. */

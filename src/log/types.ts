@@ -101,6 +101,8 @@ interface Assertion {
   writer?: Writer
   /** The host's id for one consolidation pass. */
   runId?: string
+  /** Which agent or job made the write, as the host names it (`forensics-agent`). Not the run. */
+  actor?: string
 }
 
 /** An entry as an add proposes it. Dates are ISO `YYYY-MM-DD`. */

@@ -13,12 +13,29 @@ import type { LogEvent } from './index.ts'
 // moves either is a change to what every stored log means.
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'))
+// The same data with an actor beside every writer stamp, as a 1.1 validator writes it.
+const withActor = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(withActor)
+  if (typeof value !== 'object' || value === null) return value
+  const copy = Object.fromEntries(Object.entries(value).map(([key, v]) => [key, withActor(v)]))
+  return 'writer' in copy ? { ...copy, actor: 'forensics-agent' } : copy
+}
 const log: LogEvent[] = read('./compat.log.json')
 const { state, rendering, rendered } = read('./compat.state.json')
 
 describe('a stored log', () => {
   it('folds to the state it was saved with', () => {
     assert.deepEqual(foldEntries(log), state)
+  })
+
+  it('folds to the same bytes, key order included', () => {
+    assert.equal(JSON.stringify(foldEntries(log)), JSON.stringify(state))
+  })
+
+  it('keeps an actor on what it folds to, and renders the same block with it', () => {
+    const acted = foldEntries(withActor(log) as LogEvent[])
+    assert.deepEqual(acted, withActor(state))
+    assert.deepEqual(renderEntries(acted, '2026-10-01T00:00:00Z', rendering), rendered)
   })
 
   it('renders the block it was saved with, under the render policy of its time', () => {

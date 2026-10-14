@@ -510,3 +510,48 @@ describe('an operation with no time of its own', () => {
     assert.deepEqual([proposed.event.at, proposed.event.op.at], [AT, AT])
   })
 })
+
+// Which agent or job made a write, as the host names it: stamped like the writer and the run, never read from the event.
+describe('the actor on a write', () => {
+  const tap = by('subject-action', action)
+
+  it('is stamped on every operation it lets through, for any writer', () => {
+    const added = validate(state, add(draft('n1', 'likes tea', tap)), ctxFor('subject-action', { actor: 'settings-page' }))
+    assert.ok(added.verdict === 'accept' && added.event.type === 'EntryAdded')
+    assert.equal(added.event.entry.actor, 'settings-page')
+    const retired = validate(state, retire('soft', agent('m-early')), ctxFor('agent', { actor: 'forensics-agent' }))
+    assert.ok(retired.verdict === 'accept' && retired.event.type === 'EntryRetired')
+    assert.equal(retired.event.actor, 'forensics-agent')
+  })
+
+  it('is stamped on a held operation, inside the proposal', () => {
+    const held = validate(state, add(hard('n1', 'no satay sauce, peanut allergy', agent('m-said'))), ctxFor('agent', { actor: 'chat' }))
+    assert.ok(held.verdict === 'propose' && held.event.op.type === 'EntryAdded')
+    assert.equal(held.event.op.entry.actor, 'chat')
+  })
+
+  it('is left off without one', () => {
+    const added = validate(state, add(draft('n1', 'likes tea', tap)), ctxFor('subject-action'))
+    assert.ok(added.verdict === 'accept' && added.event.type === 'EntryAdded')
+    assert.equal('actor' in added.event.entry, false)
+  })
+
+  it('is not the run: the run cap counts by writer and run, whoever the actor', () => {
+    const fromRun = (id: string, m: string): EntryEvent => add(draft(`c-${id}`, `peanut allergy note ${id}`, consolidation(msg(m))))
+    const first = validateRun(foldEntries([]), [fromRun('1', 'm-early'), fromRun('2', 'm-said')], ctxFor('consolidation', { actor: 'nightly' }))
+    const second = validateRun(first.state, [fromRun('3', 'm-healed'), fromRun('4', 'm-later')], ctxFor('consolidation', { actor: 'rerun' }))
+    assert.deepEqual(second.verdicts.map((v) => v.verdict), ['accept', 'reject'])
+    assert.deepEqual(first.state.runs, { 'consolidation:r1': 2 })
+  })
+
+  it('an event cannot name another actor', () => {
+    const relabelled = add(draft('n1', 'likes tea', { ...tap, actor: 'someone-else' }))
+    assertVerdict(validate(state, relabelled, ctxFor('subject-action', { actor: 'settings-page' })), 'reject', /writer mismatch: actor/)
+    assertVerdict(validate(state, relabelled, ctxFor('subject-action')), 'reject', /writer mismatch: actor/)
+  })
+
+  it('a malformed actor is refused', () => {
+    const malformed = add(draft('n1', 'likes tea', { ...tap, actor: 42 } as unknown as Assertion))
+    assertVerdict(validate(state, malformed, ctxFor('subject-action')), 'reject', /malformed assertion/)
+  })
+})

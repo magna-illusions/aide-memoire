@@ -9,10 +9,10 @@ import type { EntryEvent } from './types.ts'
 // redacted and redactedAt from its own events, never from a payload. An event can carry any
 // field it likes; only the fields an operation means survive into the state.
 
-const DRAFT = ['id', 'kind', 'text', 'severity', 'until', 'review', 'source', 'assertedBy', 'origin', 'writer', 'runId', 'relayed']
+const DRAFT = ['id', 'kind', 'text', 'severity', 'until', 'review', 'source', 'assertedBy', 'origin', 'writer', 'runId', 'actor', 'relayed']
 const ENTRY = [...DRAFT, 'status', 'at', 'supersedes', 'supersededBy', 'confirmedAt', 'retiredReason', 'redacted', 'redactedAt']
 const PROPOSAL = ['id', 'at', 'reason', 'op', 'status']
-const OP = ['type', 'at', 'entry', 'supersedes', 'id', 'reason', 'source', 'assertedBy', 'origin', 'writer', 'runId']
+const OP = ['type', 'at', 'entry', 'supersedes', 'id', 'reason', 'source', 'assertedBy', 'origin', 'writer', 'runId', 'actor']
 const SOURCE = ['kind', 'id']
 
 const JUNK = {
